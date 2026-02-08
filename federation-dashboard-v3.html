@@ -1,0 +1,1159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NE Regional Director - Federation Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.8/dist/cdn.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#e8f0fe',
+                            100: '#d1e1fd',
+                            200: '#a3c3fb',
+                            300: '#75a5f9',
+                            400: '#4787f7',
+                            500: '#2a5298',
+                            600: '#1e3c72',
+                            700: '#162d56',
+                            800: '#0f1e3a',
+                            900: '#070f1d',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        [x-cloak] { display: none !important; }
+        .fade-save {
+            animation: fadeGreen 0.8s ease-out;
+        }
+        @keyframes fadeGreen {
+            0% { background-color: #d1fae5; }
+            100% { background-color: transparent; }
+        }
+        @media print {
+            .no-print { display: none !important; }
+            .print-break { page-break-before: always; }
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-brand-600 to-brand-500 min-h-screen">
+
+<div x-cloak x-data="dashboard" class="max-w-[1500px] mx-auto p-4 md:p-6">
+
+    <!-- HEADER -->
+    <header class="bg-white rounded-2xl shadow-lg p-6 md:p-8 mb-6">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div>
+                <h1 class="text-2xl md:text-3xl font-bold text-brand-600">NE Regional Director Dashboard</h1>
+                <p class="text-gray-500 mt-1">Federation Management & Tracking System &mdash; Yuval Seri</p>
+            </div>
+            <div class="flex flex-wrap gap-2 no-print">
+                <button @click="exportToExcel()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition">Export Excel</button>
+                <button @click="exportToJSON()" class="bg-brand-500 hover:bg-brand-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition">Backup JSON</button>
+                <button @click="showImportModal=true" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition">Import</button>
+                <button @click="showAddFedModal=true" class="bg-amber-500 hover:bg-amber-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition">+ Federation</button>
+                <button @click="resetData()" class="bg-red-100 hover:bg-red-200 text-red-700 px-4 py-2 rounded-lg text-sm font-medium transition">Reset</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- STATS -->
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
+        <div class="bg-white rounded-xl shadow p-4 text-center">
+            <div class="text-3xl font-bold text-brand-500" x-text="stats.totalFederations"></div>
+            <div class="text-xs text-gray-500 uppercase tracking-wider mt-1">Federations</div>
+        </div>
+        <div class="bg-white rounded-xl shadow p-4 text-center">
+            <div class="text-3xl font-bold text-brand-500" x-text="stats.totalPeople"></div>
+            <div class="text-xs text-gray-500 uppercase tracking-wider mt-1">Contacts</div>
+        </div>
+        <div class="bg-white rounded-xl shadow p-4 text-center">
+            <div class="text-2xl font-bold text-green-600" x-text="fmtCur(stats.totalAlloc24)"></div>
+            <div class="text-xs text-gray-500 uppercase tracking-wider mt-1">Alloc 24-25</div>
+        </div>
+        <div class="bg-white rounded-xl shadow p-4 text-center">
+            <div class="text-2xl font-bold text-green-600" x-text="fmtCur(stats.totalAlloc25)"></div>
+            <div class="text-xs text-gray-500 uppercase tracking-wider mt-1">Alloc 25-26</div>
+        </div>
+        <div class="bg-white rounded-xl shadow p-4 text-center">
+            <div class="text-2xl font-bold text-green-600" x-text="fmtCur(stats.totalAlloc26)"></div>
+            <div class="text-xs text-gray-500 uppercase tracking-wider mt-1">Alloc 26-27</div>
+        </div>
+        <div class="bg-white rounded-xl shadow p-4 text-center">
+            <div class="text-3xl font-bold text-brand-500" x-text="stats.totalVisits"></div>
+            <div class="text-xs text-gray-500 uppercase tracking-wider mt-1">Visits</div>
+        </div>
+    </div>
+
+    <!-- SEARCH + FILTER -->
+    <div class="bg-white rounded-2xl shadow p-4 md:p-6 mb-6 no-print">
+        <div class="flex flex-col md:flex-row items-stretch md:items-center gap-4">
+            <div class="relative flex-1">
+                <input x-model="searchTerm" type="text" placeholder="Search federations, people, allocations, visits..."
+                       class="w-full border-2 border-gray-200 rounded-lg px-4 py-3 pr-10 focus:outline-none focus:border-brand-500 transition">
+                <span class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-lg">&#128269;</span>
+            </div>
+            <div class="flex flex-wrap gap-2">
+                <button @click="activeRegion='All'"
+                        :class="activeRegion==='All' ? 'bg-brand-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-brand-50'"
+                        class="px-4 py-2 rounded-full text-sm font-medium transition whitespace-nowrap">
+                    All Regions
+                </button>
+                <template x-for="fed in allFederations" :key="fed.id">
+                    <button @click="activeRegion=fed.id"
+                            :class="activeRegion===fed.id ? 'bg-brand-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-brand-50'"
+                            class="px-4 py-2 rounded-full text-sm font-medium transition whitespace-nowrap"
+                            x-text="fed.name"></button>
+                </template>
+            </div>
+        </div>
+    </div>
+
+    <!-- FEDERATION CARDS -->
+    <template x-for="fed in filteredFederations" :key="fed.id">
+        <div class="bg-white rounded-2xl shadow mb-6 overflow-hidden">
+            <!-- Card Header -->
+            <div @click="toggleFed(fed.id)" class="p-5 md:p-6 cursor-pointer hover:bg-gray-50 transition flex justify-between items-center">
+                <div>
+                    <h2 class="text-xl md:text-2xl font-bold text-brand-600" x-text="fed.name"></h2>
+                    <div class="flex flex-wrap gap-2 mt-1 text-xs text-gray-500">
+                        <span x-text="fed.people.length + ' contacts'"></span>
+                        <span>&bull;</span>
+                        <span x-text="fed.allocations.length + ' allocations'"></span>
+                        <span>&bull;</span>
+                        <span x-text="fed.visits.length + ' visits'"></span>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3">
+                    <span class="bg-brand-600 text-white text-xs px-3 py-1 rounded-full" x-text="fed.region"></span>
+                    <svg :class="expanded[fed.id] ? 'rotate-180' : ''" class="w-5 h-5 text-gray-400 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                </div>
+            </div>
+
+            <!-- Card Body -->
+            <div x-show="expanded[fed.id]" x-collapse class="border-t border-gray-100">
+                <div class="p-5 md:p-6 space-y-6">
+
+                    <!-- COMMUNITY INFO -->
+                    <section>
+                        <h3 @click="toggleSection(fed.id,'community')" class="flex items-center gap-2 text-lg font-semibold text-brand-600 cursor-pointer mb-3">
+                            <span>Community Info</span>
+                            <svg :class="sections[fed.id+'-community'] ? 'rotate-180' : ''" class="w-4 h-4 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                        </h3>
+                        <div x-show="sections[fed.id+'-community'] !== false" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="bg-gray-50 rounded-lg p-4">
+                                <label class="text-xs font-semibold text-gray-500 uppercase">Population</label>
+                                <input x-model="fed.community.population" @input="autoSave()" class="mt-1 w-full bg-transparent border-b border-dashed border-gray-300 focus:border-brand-500 outline-none py-1"
+                                       :placeholder="'Click to add'">
+                            </div>
+                            <div class="bg-gray-50 rounded-lg p-4">
+                                <label class="text-xs font-semibold text-gray-500 uppercase">Annual Budget</label>
+                                <input x-model="fed.community.annualBudget" @input="autoSave()" class="mt-1 w-full bg-transparent border-b border-dashed border-gray-300 focus:border-brand-500 outline-none py-1"
+                                       :placeholder="'Click to add'">
+                            </div>
+                            <div class="bg-gray-50 rounded-lg p-4">
+                                <label class="text-xs font-semibold text-gray-500 uppercase">Controls</label>
+                                <input x-model="fed.community.controls" @input="autoSave()" class="mt-1 w-full bg-transparent border-b border-dashed border-gray-300 focus:border-brand-500 outline-none py-1"
+                                       :placeholder="'Click to add'">
+                            </div>
+                            <div class="bg-gray-50 rounded-lg p-4">
+                                <label class="text-xs font-semibold text-gray-500 uppercase">Summer Camps</label>
+                                <input x-model="fed.community.summerCamps" @input="autoSave()" class="mt-1 w-full bg-transparent border-b border-dashed border-gray-300 focus:border-brand-500 outline-none py-1"
+                                       :placeholder="'Click to add'">
+                            </div>
+                            <div class="bg-gray-50 rounded-lg p-4 md:col-span-2">
+                                <label class="text-xs font-semibold text-gray-500 uppercase">Details</label>
+                                <textarea x-model="fed.community.details" @input="autoSave()" rows="2" class="mt-1 w-full bg-transparent border-b border-dashed border-gray-300 focus:border-brand-500 outline-none py-1 resize-y"
+                                          :placeholder="'Click to add details'"></textarea>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- PEOPLE -->
+                    <section>
+                        <div class="flex items-center justify-between mb-3">
+                            <h3 @click="toggleSection(fed.id,'people')" class="flex items-center gap-2 text-lg font-semibold text-brand-600 cursor-pointer">
+                                <span x-text="'Key People (' + fed.people.length + ')'"></span>
+                                <svg :class="sections[fed.id+'-people'] ? 'rotate-180' : ''" class="w-4 h-4 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                            </h3>
+                            <button @click="currentFedId=fed.id; showAddPersonModal=true" class="text-sm bg-brand-500 hover:bg-brand-600 text-white px-3 py-1.5 rounded-lg transition no-print">+ Add</button>
+                        </div>
+                        <div x-show="sections[fed.id+'-people'] !== false">
+                            <template x-for="cat in getCategories(fed)" :key="cat">
+                                <div class="mb-4">
+                                    <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2" x-text="cat"></h4>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                                        <template x-for="person in fed.people.filter(p => p.category === cat)" :key="person.id">
+                                            <div class="border-2 border-gray-200 rounded-lg p-3 hover:border-brand-400 transition relative group">
+                                                <div class="font-semibold text-brand-600" x-text="person.name"></div>
+                                                <div class="text-gray-500 text-sm" x-text="person.role || 'No role'"></div>
+                                                <template x-if="person.email">
+                                                    <div class="text-xs text-gray-400 mt-1" x-text="person.email"></div>
+                                                </template>
+                                                <template x-if="person.phone">
+                                                    <div class="text-xs text-gray-400" x-text="person.phone"></div>
+                                                </template>
+                                                <div class="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition no-print">
+                                                    <button @click="editingPerson = JSON.parse(JSON.stringify(person)); currentFedId=fed.id; showEditPersonModal=true"
+                                                            class="text-brand-400 hover:text-brand-600 text-xs bg-brand-50 rounded px-1.5 py-0.5">Edit</button>
+                                                    <button @click="removePerson(fed.id, person.id)"
+                                                            class="text-red-400 hover:text-red-600 text-xs bg-red-50 rounded px-1.5 py-0.5">X</button>
+                                                </div>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                    </section>
+
+                    <!-- ALLOCATIONS -->
+                    <section>
+                        <div class="flex items-center justify-between mb-3">
+                            <h3 @click="toggleSection(fed.id,'alloc')" class="flex items-center gap-2 text-lg font-semibold text-brand-600 cursor-pointer">
+                                <span x-text="'Allocations (' + fed.allocations.length + ')'"></span>
+                                <svg :class="sections[fed.id+'-alloc'] ? 'rotate-180' : ''" class="w-4 h-4 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                            </h3>
+                            <button @click="currentFedId=fed.id; showAddAllocModal=true" class="text-sm bg-brand-500 hover:bg-brand-600 text-white px-3 py-1.5 rounded-lg transition no-print">+ Add</button>
+                        </div>
+                        <div x-show="sections[fed.id+'-alloc'] !== false" class="overflow-x-auto">
+                            <table class="w-full text-sm" x-show="fed.allocations.length > 0">
+                                <thead>
+                                    <tr class="bg-gray-50">
+                                        <th class="text-left p-3 font-semibold text-brand-600">Program</th>
+                                        <th class="text-right p-3 font-semibold text-brand-600">2024-25</th>
+                                        <th class="text-right p-3 font-semibold text-brand-600">2025-26</th>
+                                        <th class="text-right p-3 font-semibold text-brand-600">2026-27</th>
+                                        <th class="w-10 no-print"></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <template x-for="alloc in fed.allocations" :key="alloc.id">
+                                        <tr class="border-b border-gray-100 hover:bg-gray-50">
+                                            <td class="p-3" x-text="alloc.program + (alloc.notes ? ' (' + alloc.notes + ')' : '')"></td>
+                                            <td class="p-3 text-right text-green-600 font-semibold" x-text="fmtCur(alloc.amount_24_25)"></td>
+                                            <td class="p-3 text-right text-green-600 font-semibold" x-text="fmtCur(alloc.amount_25_26)"></td>
+                                            <td class="p-3 text-right">
+                                                <input type="text"
+                                                       :value="alloc.amount_26_27 ? fmtCur(alloc.amount_26_27) : ''"
+                                                       @blur="alloc.amount_26_27 = parseAmt($event.target.value); autoSave()"
+                                                       placeholder="$0"
+                                                       class="w-24 text-right border border-gray-200 rounded px-2 py-1 focus:outline-none focus:border-brand-500">
+                                            </td>
+                                            <td class="p-3 no-print">
+                                                <button @click="removeAllocation(fed.id, alloc.id)" class="text-red-400 hover:text-red-600">&times;</button>
+                                            </td>
+                                        </tr>
+                                    </template>
+                                </tbody>
+                                <tfoot>
+                                    <tr class="bg-brand-50 font-bold text-brand-600">
+                                        <td class="p-3">Total</td>
+                                        <td class="p-3 text-right" x-text="fmtCur(sumAlloc(fed, '24_25'))"></td>
+                                        <td class="p-3 text-right" x-text="fmtCur(sumAlloc(fed, '25_26'))"></td>
+                                        <td class="p-3 text-right" x-text="fmtCur(sumAlloc(fed, '26_27'))"></td>
+                                        <td class="no-print"></td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </section>
+
+                    <!-- VISITS -->
+                    <section>
+                        <div class="flex items-center justify-between mb-3">
+                            <h3 @click="toggleSection(fed.id,'visits')" class="flex items-center gap-2 text-lg font-semibold text-brand-600 cursor-pointer">
+                                <span x-text="'Visits (' + fed.visits.length + ')'"></span>
+                                <svg :class="sections[fed.id+'-visits'] ? 'rotate-180' : ''" class="w-4 h-4 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                            </h3>
+                            <button @click="currentFedId=fed.id; showAddVisitModal=true" class="text-sm bg-brand-500 hover:bg-brand-600 text-white px-3 py-1.5 rounded-lg transition no-print">+ Add</button>
+                        </div>
+                        <div x-show="sections[fed.id+'-visits'] !== false" class="space-y-2">
+                            <template x-for="visit in fed.visits" :key="visit.id">
+                                <div class="bg-brand-50 border-l-4 border-brand-500 rounded-r-lg p-3 flex justify-between items-start group">
+                                    <div>
+                                        <div class="font-semibold text-brand-600" x-text="visit.date"></div>
+                                        <div class="text-gray-600 text-sm" x-text="visit.description"></div>
+                                        <template x-if="visit.notes">
+                                            <div class="text-gray-400 text-xs mt-1 italic" x-text="visit.notes"></div>
+                                        </template>
+                                    </div>
+                                    <button @click="removeVisit(fed.id, visit.id)" class="text-red-400 hover:text-red-600 opacity-0 group-hover:opacity-100 transition no-print ml-2 shrink-0">&times;</button>
+                                </div>
+                            </template>
+                            <template x-if="fed.visits.length === 0">
+                                <p class="text-gray-400 text-sm italic">No visits scheduled</p>
+                            </template>
+                        </div>
+                    </section>
+
+                    <!-- SHLICHUT & JAFI PROGRAMS -->
+                    <section class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <h3 class="text-lg font-semibold text-brand-600 mb-2">Shlichut Programs</h3>
+                            <div class="space-y-1">
+                                <template x-for="(item, idx) in fed.shlichut" :key="idx">
+                                    <div class="bg-gray-50 rounded px-3 py-2 flex justify-between items-center group">
+                                        <input :value="item" @blur="fed.shlichut[idx]=$event.target.value; autoSave()"
+                                               class="bg-transparent w-full outline-none">
+                                        <button @click="fed.shlichut.splice(idx,1); autoSave()" class="text-red-400 hover:text-red-600 opacity-0 group-hover:opacity-100 ml-2 no-print">&times;</button>
+                                    </div>
+                                </template>
+                                <button @click="fed.shlichut.push(''); autoSave()" class="text-sm text-brand-500 hover:text-brand-600 mt-1 no-print">+ Add Program</button>
+                            </div>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-semibold text-brand-600 mb-2">JAFI Programs</h3>
+                            <div class="space-y-1">
+                                <template x-for="(item, idx) in fed.jafiPrograms" :key="idx">
+                                    <div class="bg-gray-50 rounded px-3 py-2 flex justify-between items-center group">
+                                        <input :value="item" @blur="fed.jafiPrograms[idx]=$event.target.value; autoSave()"
+                                               class="bg-transparent w-full outline-none">
+                                        <button @click="fed.jafiPrograms.splice(idx,1); autoSave()" class="text-red-400 hover:text-red-600 opacity-0 group-hover:opacity-100 ml-2 no-print">&times;</button>
+                                    </div>
+                                </template>
+                                <button @click="fed.jafiPrograms.push(''); autoSave()" class="text-sm text-brand-500 hover:text-brand-600 mt-1 no-print">+ Add Program</button>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- OPPORTUNITIES -->
+                    <section>
+                        <h3 class="text-lg font-semibold text-brand-600 mb-2">Opportunities & Programming</h3>
+                        <div class="space-y-1">
+                            <template x-for="(item, idx) in fed.opportunities" :key="idx">
+                                <div class="bg-white border-l-4 border-brand-500 rounded-r px-3 py-2 flex justify-between items-start group">
+                                    <input :value="item" @blur="fed.opportunities[idx]=$event.target.value; autoSave()"
+                                           class="bg-transparent w-full outline-none text-sm">
+                                    <button @click="fed.opportunities.splice(idx,1); autoSave()" class="text-red-400 hover:text-red-600 opacity-0 group-hover:opacity-100 ml-2 shrink-0 no-print">&times;</button>
+                                </div>
+                            </template>
+                            <button @click="fed.opportunities.push(''); autoSave()" class="text-sm text-brand-500 hover:text-brand-600 mt-1 no-print">+ Add Opportunity</button>
+                        </div>
+                    </section>
+
+                    <!-- NOTES -->
+                    <section>
+                        <h3 class="text-lg font-semibold text-amber-700 mb-2">General Notes</h3>
+                        <div class="bg-amber-50 border-2 border-amber-300 rounded-lg p-4">
+                            <textarea x-model="fed.notes" @input="autoSave()" rows="4"
+                                      :placeholder="'Add notes, follow-ups, or reminders for ' + fed.name + '...'"
+                                      class="w-full bg-transparent outline-none resize-y text-sm"></textarea>
+                        </div>
+                    </section>
+
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <!-- No results -->
+    <template x-if="filteredFederations.length === 0">
+        <div class="bg-white rounded-2xl shadow p-12 text-center">
+            <h2 class="text-xl font-bold text-brand-600 mb-2">No results found</h2>
+            <p class="text-gray-500">Try adjusting your search or filter.</p>
+        </div>
+    </template>
+
+    <!-- ===== MODALS ===== -->
+
+    <!-- ADD PERSON MODAL -->
+    <div x-show="showAddPersonModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" @click.self="showAddPersonModal=false">
+        <div class="bg-white rounded-2xl shadow-xl p-6 w-full max-w-md" @click.stop>
+            <h3 class="text-xl font-bold text-brand-600 mb-4">Add New Person</h3>
+            <div class="space-y-3">
+                <input x-model="newPerson.name" placeholder="Full Name *" class="w-full border-2 border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:border-brand-500">
+                <input x-model="newPerson.role" placeholder="Role / Title" class="w-full border-2 border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:border-brand-500">
+                <select x-model="newPerson.category" class="w-full border-2 border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:border-brand-500">
+                    <option value="Federation">Federation</option>
+                    <option value="Israel Office">Israel Office</option>
+                    <option value="BOG">BOG</option>
+                    <option value="Cabinet">Cabinet</option>
+                    <option value="Lay Leaders">Lay Leaders</option>
+                    <option value="Community">Community</option>
+                </select>
+                <input x-model="newPerson.email" placeholder="Email (optional)" type="email" class="w-full border-2 border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:border-brand-500">
+                <input x-model="newPerson.phone" placeholder="Phone (optional)" class="w-full border-2 border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:border-brand-500">
+            </div>
+            <div class="flex gap-3 mt-5">
+                <button @click="addPerson()" class="flex-1 bg-brand-500 hover:bg-brand-600 text-white py-2 rounded-lg font-medium transition">Add Person</button>
+                <button @click="showAddPersonModal=false" class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 py-2 rounded-lg font-medium transition">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- EDIT PERSON MODAL -->
+    <div x-show="showEditPersonModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" @click.self="showEditPersonModal=false">
+        <div class="bg-white rounded-2xl shadow-xl p-6 w-full max-w-md" @click.stop>
+            <h3 class="text-xl font-bold text-brand-600 mb-4">Edit Person</h3>
+            <div class="space-y-3">
+                <input x-model="editingPerson.name" placeholder="Full Name *" class="w-full border-2 border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:border-brand-500">
+                <input x-model="editingPerson.role" placeholder="Role / Title" class="w-full border-2 border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:border-brand-500">
+                <select x-model="editingPerson.category" class="w-full border-2 border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:border-brand-500">
+                    <option value="Federation">Federation</option>
+                    <option value="Israel Office">Israel Office</option>
+                    <option value="BOG">BOG</option>
+                    <option value="Cabinet">Cabinet</option>
+                    <option value="Lay Leaders">Lay Leaders</option>
+                    <option value="Community">Community</option>
+                </select>
+                <input x-model="editingPerson.email" placeholder="Email (optional)" type="email" class="w-full border-2 border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:border-brand-500">
+                <input x-model="editingPerson.phone" placeholder="Phone (optional)" class="w-full border-2 border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:border-brand-500">
+            </div>
+            <div class="flex gap-3 mt-5">
+                <button @click="saveEditPerson()" class="flex-1 bg-brand-500 hover:bg-brand-600 text-white py-2 rounded-lg font-medium transition">Save</button>
+                <button @click="showEditPersonModal=false" class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 py-2 rounded-lg font-medium transition">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ADD VISIT MODAL -->
+    <div x-show="showAddVisitModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" @click.self="showAddVisitModal=false">
+        <div class="bg-white rounded-2xl shadow-xl p-6 w-full max-w-md" @click.stop>
+            <h3 class="text-xl font-bold text-brand-600 mb-4">Add New Visit</h3>
+            <div class="space-y-3">
+                <input x-model="newVisit.date" placeholder="Date (e.g., March 15, 2026) *" class="w-full border-2 border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:border-brand-500">
+                <textarea x-model="newVisit.description" placeholder="Description / Schedule" rows="3" class="w-full border-2 border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:border-brand-500"></textarea>
+                <textarea x-model="newVisit.notes" placeholder="Notes (optional)" rows="2" class="w-full border-2 border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:border-brand-500"></textarea>
+            </div>
+            <div class="flex gap-3 mt-5">
+                <button @click="addVisit()" class="flex-1 bg-brand-500 hover:bg-brand-600 text-white py-2 rounded-lg font-medium transition">Add Visit</button>
+                <button @click="showAddVisitModal=false" class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 py-2 rounded-lg font-medium transition">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ADD ALLOCATION MODAL -->
+    <div x-show="showAddAllocModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" @click.self="showAddAllocModal=false">
+        <div class="bg-white rounded-2xl shadow-xl p-6 w-full max-w-md" @click.stop>
+            <h3 class="text-xl font-bold text-brand-600 mb-4">Add New Allocation</h3>
+            <div class="space-y-3">
+                <input x-model="newAlloc.program" placeholder="Program Name *" class="w-full border-2 border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:border-brand-500">
+                <input x-model="newAlloc.amount_24_25" placeholder="Amount 2024-25 (e.g., 100000)" class="w-full border-2 border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:border-brand-500">
+                <input x-model="newAlloc.amount_25_26" placeholder="Amount 2025-26" class="w-full border-2 border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:border-brand-500">
+                <input x-model="newAlloc.amount_26_27" placeholder="Amount 2026-27" class="w-full border-2 border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:border-brand-500">
+            </div>
+            <div class="flex gap-3 mt-5">
+                <button @click="addAllocation()" class="flex-1 bg-brand-500 hover:bg-brand-600 text-white py-2 rounded-lg font-medium transition">Add Allocation</button>
+                <button @click="showAddAllocModal=false" class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 py-2 rounded-lg font-medium transition">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ADD FEDERATION MODAL -->
+    <div x-show="showAddFedModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" @click.self="showAddFedModal=false">
+        <div class="bg-white rounded-2xl shadow-xl p-6 w-full max-w-md" @click.stop>
+            <h3 class="text-xl font-bold text-brand-600 mb-4">Add New Federation</h3>
+            <div class="space-y-3">
+                <input x-model="newFed.name" placeholder="Federation Name *" class="w-full border-2 border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:border-brand-500">
+                <input x-model="newFed.region" placeholder="Region (e.g., NE)" class="w-full border-2 border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:border-brand-500" value="NE">
+            </div>
+            <div class="flex gap-3 mt-5">
+                <button @click="addFederation()" class="flex-1 bg-brand-500 hover:bg-brand-600 text-white py-2 rounded-lg font-medium transition">Add Federation</button>
+                <button @click="showAddFedModal=false" class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 py-2 rounded-lg font-medium transition">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- IMPORT MODAL -->
+    <div x-show="showImportModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" @click.self="showImportModal=false">
+        <div class="bg-white rounded-2xl shadow-xl p-6 w-full max-w-md" @click.stop>
+            <h3 class="text-xl font-bold text-brand-600 mb-4">Import Data</h3>
+            <p class="text-gray-500 text-sm mb-4">Select a JSON backup file to restore your data. This will replace all current data.</p>
+            <input type="file" accept=".json" @change="importFromJSON($event)" class="w-full border-2 border-gray-200 rounded-lg px-4 py-2">
+            <div class="flex gap-3 mt-5">
+                <button @click="showImportModal=false" class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 py-2 rounded-lg font-medium transition">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Save Indicator -->
+    <div x-show="saveIndicator" x-transition.opacity class="fixed bottom-6 right-6 bg-green-600 text-white px-4 py-2 rounded-lg shadow-lg text-sm font-medium z-50">
+        Saved
+    </div>
+
+</div>
+
+<script>
+// =============================================
+// RAW DATA (from federation_data_2026-02-05.json)
+// =============================================
+const RAW_DATA = {
+  "The Associated - Baltimore": [
+    [null, "Israel Fellow - Hopkins University (currently not interested but maybe next year)", "Community", "100,000 approx (30% ultra-orthodox)", "Federation", "Andrew Kushnir", "President and CEO", "Core", "$ 2,013,048 ", "$ 1,862,396 ", "1 Shabi ", null, "June 6th 24", "Intoduction meeting as part of Chafifa with Sigal K", null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+    [null, null, "Annual budget ", "$90M approx ($30M Campaign+15M Agencies+ $60M gifts/endowments/income); Israel&Global: $6M ", null, "Ruth Miller", "Chief Planning Officer", "Masa", "$ 120,000", "$ 80,000 ", "1 Ofek ", null, "Oct 1st 24", "Federation visit", null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+    [null, null, "Controls", "Foundations", null, "Mary Drey Haar", "Vice President, Community Planning & Allocations", "Youth Futures", "$10,000", "$10,000", "6 Shinshinim", null, "March 18th 24", "Jafi review for all professionals; Meeting with professionals; Meeting with Shlichim", null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+    [null, null, null, "18 Agencies - frd for all of them - including: Jewish education services (JES)- 36 institutions; 2 JCC (including Day camps, 1 Overnight Camp; Jewish connection network \u2013 900 engaged people, Jewish day schools, 5 Hillels, and more.", null, "Jason Horowitz", "Assistant Vice President, Israel and Global Initiatives", "P2G (Ashkelon)", "$ 245,000", " $268,000", null, null, "May 4th-7th 2025", "Federation visit; Richie Pearlston dinner; JPRO", null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+    [null, null, null, null, null, "Aviva Schwartz", "Manager, Israel and Global Initiatives", "Keren Or Emergency Loan Fund ", "$667,000", null, null, null, "Sep 9th 2025", "Fed visit; Shinshinim orientation", null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+    [null, null, null, null, null, "Michelle Ostroff", "vice president and incharge on the annual campaign.", "Odesa Partnership ", "$10,000", "$45,800", null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+    [null, null, null, null, null, "Michelle Price", "Israel Travel Recruiter", "Music Classes Ashkelon", " $5,000", "$8,250", null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+    [null, null, null, null, null, "Benny scholder", "mission director", "Programming for Ukrainians in Poland ", "$2,000", "$2,000", null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+    [null, null, null, null, null, "Smadar Haika-Fox", "JES, superviser shsh", null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+    [null, null, null, null, null, "Isaac Pretor", "I&O committee chairman ,Cabinet member", null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+    [null, null, null, null, null, "Yossi Kelemer", "Liason for Ashkelon-Baltimore (Board member)", null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+    [null, null, null, null, null, "Aharon Levitt", "JES - CEO (Smadar's Supervisor)", null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+    [null, null, null, null, null, "Gabrielle Burger", "The network, suprevisor", null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+    [null, null, null, null, null, "David Speer", "Maryland/Israel Development Center's  Executive Director", null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+    [null, null, null, null, null, "Debbie Dubin", "Senior Director of Major Gifts", "Emergency campaign", "$5,000,000", null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+    [null, null, null, null, null, "Ami Nahshoni", "Director, Israel and overseas", null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+    [null, null, null, null, "Israel Office", "Ittai Korinmann Weiss", "Managing director Israel office", null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+    [null, null, null, null, "BOG - Jafi", "Linda Hurwitz", "BOG", null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+    [null, null, null, null, null, "Bruce Shulk", "chairman of budget and finance BOG Jafi", null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+    [null, null, null, null, "Lay Leaders", "Richie Pearlston", null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+    [null, null, null, null, null, "P.J Pearlston", "Richi's son", null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null]
+  ],
+  "Philadelphia": [
+    ["250K - grants/Loan fund for Kiryat Shmona", null, "Community ", "5 counties, 250,000 approx. (20% low Social-Ec class)", "Federation", "Michael Balaban", "CEO and President ", "Core", " $ 610,000", " $ 610,000", "1 Shabi (RooteOne - JCC)", "Shlichim B'madim", "June 4th 24", "Intoduction meeting as part of Chafifa with Sigal K", null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+    ["Federation's endowments - Funding for programs (Shlichut, YF, etc)", null, "Annual budget ", "$60-71M approx ($10-15M Campaign + $50-60M gifts/endowments/income )", null, "Carmen Adames ", "Executive Assistant to the President and CEO", "P2G (Netivot-Sdot Negev)", " $ 360,000", " $ 360,000", "2 Shinshinim (JCC)", null, "Sep 9th 24", "Check-in meeting with Fed's CEO, Michael Balaban", null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+    [null, null, "Controls", "JCRC", null, "Jeffrey Lasday ", "Senior Chief of External Affairs", "Youth Futures", "$66,450", null, null, null, "March 2025", "Check-in meeting with Fed's CEO, Michael Balaban", null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+    [null, null, null, "Jewish education support", null, "Kelly Romirowsky ", "Director, Strategy and Impact", "Campers2gether", " $125,000 (50)", null, null, null, "June 20th 2025", "Check-in meeting with Fed's CEO, Michael Balaban", null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+    [null, null, null, null, null, "Alix Caplan", "Director, Annual Campaign", "Marom", "$250,000", null, null, null, "Feb 11th 2026", "Check-in meeting with Fed's CEO, Michael Balaban", null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+    [null, null, null, null, null, "Sara Salomon", "Chief development officer", "Rising lion ", "$20,000 (Emergency)", null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+    [null, null, null, null, null, "Jason Holtzman", "JCRC director", "Loan fund - Netivot-Sdot Negev", null, "$250,000", null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+    [null, null, null, null, null, "Sara Lefkowits", "Cabinet Stuff, director of nextgen", "Israel Fellows (2)", null, "$75,000", null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+    [null, null, null, null, null, "Susan lundy", "gift team (under alix)", null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+    [null, null, null, null, null, "Rabbi David Levin", "President, The Board of Rabbis of Greater Philadelphia", null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+    [null, null, null, null, null, "David Ainsman", "Presidant elect, Jewish federation of Grater Philadelphia", null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+    [null, null, null, null, "Federation - Israel office", "Tali Lidar", "I&O + Israel office (Israel)", null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+    [null, null, null, null, null, "Sapir Saad Itzhaki", "Co-Managing Director P2G", null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+    [null, null, null, null, null, "Einat Mazor Gilboa", "Co-Managing Director P2G", null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+    [null, null, null, null, null, "Eliav Didi", "Director - Marketing & Communications", null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+    [null, null, null, null, null, "Beth Razin", "Associate Director of Jewish Life", null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+    [null, null, null, null, null, "Tamar Brody", null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+    [null, null, null, null, "BOG - Jafi", "Gail Nuri", "since 11/2024", null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+    [null, null, null, null, null, "Lauren Danneman", "since 11/2024", null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+    [null, null, null, null, "Cabinet", "Jonathan Korman", "Cabinet", null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+    [null, null, null, null, null, "Danielle Weiss", "Cabinet graduate, former Chair of Federation's Jewish Community Relations Council (JCRC) ", null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+    [null, null, null, null, "Lay Leaders", "Ben Schindler", "Co-chair", null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+    [null, null, null, null, null, "Stu goodman", "lay leader", null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+    [null, null, null, null, null, "Joseph Glyn", "chairman of Israel committee, lay leader", null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+    [null, null, null, null, "Community", "Alan scher", "CEO ", null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+    [null, null, null, null, null, "Moria Simon-hazani", "\u05d0\u05d7\u05e8\u05d0\u05d9\u05ea \u05e2\u05dc \u05ea\u05d5\u05db\u05e0\u05d9\u05d5\u05ea \u05d9\u05e9\u05e8\u05d0\u05dc", null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+    [null, null, null, null, null, "Elana Rivel", "director", null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+    [null, null, null, null, null, "Marshal Leasack", "principal", null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+    [null, null, null, null, null, "Rabbi Michael Uram", "educational director", null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null]
+  ],
+  "GMW": [
+    ["Approved the strategic plan for the next 5 years. Intend to invest more in Israel ", "Israel Fellow - federation Hillel", "Community ", "4.5 counties, 150,000 approx. (58,000 households, 30,000 people define themselves as non-jews)", "Federation", "Meredith Dragon", "CEO", "Core ", "$1,300,188", "$1,336,562", "1 Shabi", "Shlichim B'madim", "Aug 29th 24", "Introduction meeting with Fed professionals; Orientation day with the Shinshinim", null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+    ["The builders event - Soldier as a speaker", "Ofek Shlicut", "Annual budget ", "$30M approx ($22M Campaign + $8M gifts). Israel - 5-6M. JAFI/JDC Eq. (JDC - 1.3)", null, "Benjamin Mann", "Chief Planning Officer", "Youth Futures (Horfiesh)", "$ 25,000", "$ 25,000", "6 Shinshinim", null, "Feb 20th 25", "Jafi review for all professionals; Meeting with professionals; Meeting with Shlichim", null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+    [null, null, "Support", " 18 institutions (4 Jewish day schools, 3 JCCs, Synagogues, etc.)", null, "Rebecca Pollack", "Cheif Developing Officer", "P2G (Ofakim, Merhavim, Arad, Horfeish, Rishol Lezion - Ramat Eliyahu, Kibbutz Erez)", "$391,000", "$491,000", null, null, "June 8th 25", "GMW teen groups event", null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+    [null, null, "Controls/Coordinated", "Foundation \u2013 independent, coordinate with the federation system. $700M of 800 funds. Last year allocated $53M, 20% for Israel", null, "Michal Werner", "Director at Jewish Community Foundation of Greater MetroWest NJ", "Campers2gether", "$ 225,000", null, null, null, "May 8th 25", "The builders event", null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+    [null, null, null, "Summer Camps: 3 JCC (Day Camps)+ 11 Overnight Camps (No", null, "Mart\u00edn Yaf\u00e9", "Director, Global Connections", "Rising Lion", " $ 700,000", null, null, null, "July-Aug 2025", "Summer Camps visits", null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+    [null, null, null, null, null, "Tracy Levin", "Directior of Summer camps", null, null, null, null, null, "Sep 8th 2025", "Fed visit; Shinshinim orientation", null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+    [null, null, null, null, null, "Avi Siegal", "Director of Teen Initiatives", null, null, null, null, null, "Nov 12th 2025", "Fed visit; Diller Conference", null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+    [null, null, null, null, null, "Amy Bilun", "Community engagment", null, null, null, null, null, "Jan 12th 2026", "Peoplehood committee; Fed professionals meetings", null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+    [null, null, null, null, "BOG - Jafi", "Lori Klinghoffer ", "BOG", null, null, null, null, null, "Feb 2nd 2026", "Federation visit with Gal, including: Meredith (CEO), Benjamin (CPO), Martin (Israel and global), shlichim", "Opportunities to expand the Mishlachat - Martin; New GMW strategic plan that was just approved", null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+    [null, null, null, null, null, "Debbie Rovner", "BOG", null, null, null, null, null, "March 25th 2026", "Federation visit with Yehuda", null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+    [null, null, null, null, "Federation - Israel office", "Michal Tzur", "GMW representative in Israel", null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+    [null, null, null, null, null, "Ariel Erani", "P2G Director", null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+    [null, null, null, null, "Cabinet", "Ben Hoffer", "JCRC director and  federation executive committee", null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+    [null, null, null, null, null, "Alexandra Feinstein", "Cabinet", null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null]
+  ],
+  "NNJ": [
+    ["investing in mental health programs", "Israel Fellow - federation Hillel", "Community", " 3 counties,125,000 approx., 10-15,000 Israelis.", "Federation", "Jason Shames ", "CEO", "Core ", "$ 470,600", "$ 470,600", null, "Shlichim B'madim", "Oct 30th 2024", "Introduction meeting with Fed professionals (include CEO, Jason Shamas)", null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+    [null, "Campers2gether", "Annual Budget ", "$15M approx. Highest allocation to JAFI.", null, "Sheryl Sarin ", "Senior Director- Community Planning and Allocations", "Youth Futures", "$100,000", "$100,000", null, null, "Oct 16th 2025", "Community visit (JCC, Synagogues)", null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+    [null, null, "Controls", "JCRC", null, "Rami Feinstein", "Manager of the Israel engagement center", "Masa", "$50,000", "$50,000", null, null, "Nov 7th 2025", "Teachers Kenes - Aliya promotion", null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+    [null, null, null, "Hillel Unit", null, null, "Senior Planning and Allocations Associate", "Summer Camps in Kyiv", "$50,000", "$45,000", null, null, "March 26th 2026", "Federation visit with Yehuda", null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+    [null, null, "Summer Camps", "only social workers for 2 camps", null, "Ilana Berman", "JCRC Director", "Yesodot", "$16,000", "$16,000", null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+    [null, null, null, null, "Federation - Israel office", "Ravit Steinmetz", "Director of NNJ-Nahariya partnership", null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+    [null, null, null, null, "BOG - Jafi", "Roberta Abrams", "BOG", null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+    [null, null, null, null, "Community", "David Rosenberg", "Executive Director, New Jersey Jewish Business Alliance", null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null]
+  ],
+  "CJP": [
+    ["Haifa-Boston Loan fund", "P2P", "Community", "250,000 approx. 30,000 Israelis", null, "Noam Bentov", "Associate Vice President, Israel and Global Jewry", "Core ", "$275,000", "$375,000", "26-27: 2 Shinshinim (Shirat Hayam Cong, North shore), 1 Ofek (Rashi School, Beth Shalom)", null, "Dec 10th 24", "Introduction meeting (first time in person), including I&O and CEO, Marc Baker", null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+    ["Israel Office (Lior Krengel) - $4M for rebuilding Israel", "Increase the number of people going on journies to Israel", "Annual Budget ", "$58-60M approx", null, "Ariel Libhaber", "Senior Director, Global Partnerships ", "Boston-haifa Loan Fund", null, "$100,000", null, null, "Feb 3rd 25", "Prizma conference; Fed meetings", null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+    [null, null, "Controls", "CCA - Center for Combating Antisemitism", null, "Debbie Katz", "Senior Development Officer, Principal Gifts", null, null, null, null, null, "Dec 15-16th 2025", "Communities visits; Shlichim Conference; Fed meetings", null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+    [null, null, null, null, null, "Sara sousy", "schedule incharge for Marc Baker", null, null, null, null, null, "March 23th 2026", "Federation visit with Yehuda", null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+    [null, null, null, null, null, "Samantha Robinson", "Senior Manager", null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+    [null, null, null, null, "Federation - Israel office", "Oshrat Moyal", "Boston-Haifa Partnership", null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+    [null, null, null, null, null, "Lior Krangel", "director of CJP's Israel office", null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+    [null, null, null, null, "BOG - Jafi", "Lisa Wallak", "BOG", null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null]
+  ],
+  "Rochester": [
+    [null, "Israel Fellow - Roch - U", "Community", "18,000 approx ", null, "Leah Goldman", "Chief Planning and Programming Officer ", "Core ", "$ 618,689", "$618,689", null, "Shlichim B'madim", "March 26-27 2025", "Federation Visit", null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+    [null, "Ofek - JCC", "Annual Budget ", "$10M approx (Annual campaign: $4.5M); Israel total allocation: $1.1M (most to Jafi, about $200K to JDC)", null, "Michal Spivak", "ShinShinim Program Director", "P2G", "$175,000", "$175,000", null, null, "April 28 - May 2nd 2025", "Shlichim B'madim; Federation meeting; Shlichim visit", null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+    [null, null, null, null, null, "Gal Dimambro", "partnership", null, null, null, null, null, "Sep 10-11th 25", "Fed visit; Shinshinim orientation", null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+    [null, null, null, null, null, "Efrat Petel", "Israel and global Jewry", null, null, null, null, null, "Dec 17-18th 25", "visit with Gal - Fed meetings; Communities visits; shlichim visit", null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+    [null, null, null, null, null, "Jeanine Monachino", "Chief Financial & Operating Officer", null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+    [null, null, null, null, null, "Debbie Goldberg", "Chief Philanthropic Officer", null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+    [null, null, null, null, null, "Randy", "President&Chairman of Board", null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+    [null, null, null, null, "Israel office", "Elinor Zur", "P2G Director", null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+    [null, null, null, null, "BOG - Jafi", "Rick Goldstien", "BOG", null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null]
+  ]
+};
+
+// =============================================
+// UTILITIES
+// =============================================
+function parseAmt(val) {
+    if (!val) return 0;
+    const cleaned = String(val).replace(/[$,\s]/g, '').replace(/\(.*\)/, '').trim();
+    return parseFloat(cleaned) || 0;
+}
+
+function extractNote(val) {
+    if (!val) return '';
+    const match = String(val).match(/\(([^)]+)\)/);
+    return match ? match[1] : '';
+}
+
+function fmtCur(amount) {
+    if (!amount || amount === 0) return '-';
+    return '$' + Number(amount).toLocaleString('en-US', { maximumFractionDigits: 0 });
+}
+
+function genId(prefix) {
+    return prefix + '-' + Date.now().toString(36) + Math.random().toString(36).substr(2, 4);
+}
+
+function normCat(raw) {
+    if (!raw) return 'Federation';
+    const l = raw.toLowerCase();
+    if (l.includes('bog')) return 'BOG';
+    if (l.includes('israel')) return 'Israel Office';
+    if (l.includes('cabinet')) return 'Cabinet';
+    if (l.includes('lay lead')) return 'Lay Leaders';
+    if (l.includes('community') && !l.includes('community ')) return 'Community';
+    return 'Federation';
+}
+
+function debounce(fn, ms) {
+    let timer;
+    return function(...args) {
+        clearTimeout(timer);
+        timer = setTimeout(() => fn.apply(this, args), ms);
+    };
+}
+
+// =============================================
+// DATA MIGRATION
+// =============================================
+function migrateRawData(raw) {
+    const meta = {
+        "The Associated - Baltimore": { id: "baltimore", name: "The Associated - Baltimore" },
+        "Philadelphia": { id: "philadelphia", name: "Jewish Federation of Greater Philadelphia" },
+        "GMW": { id: "gmw", name: "Greater MetroWest NJ" },
+        "NNJ": { id: "nnj", name: "Northern NJ" },
+        "CJP": { id: "cjp", name: "CJP (Boston)" },
+        "Rochester": { id: "rochester", name: "Jewish Federation of Rochester" }
+    };
+
+    const result = { _version: 1, _lastModified: new Date().toISOString(), federations: {} };
+
+    for (const [rawName, rows] of Object.entries(raw)) {
+        const m = meta[rawName];
+        if (!m) continue;
+
+        const fed = {
+            id: m.id, name: m.name, region: 'NE',
+            community: { population: null, annualBudget: null, controls: null, details: null, summerCamps: null },
+            people: [], allocations: [], shlichut: [], jafiPrograms: [],
+            opportunities: [], visits: [], notes: ''
+        };
+
+        let currentCat = 'Federation';
+        let pIdx = 0, aIdx = 0, vIdx = 0;
+        const detailParts = [];
+
+        for (const row of rows) {
+            // Community info
+            if (row[2]) {
+                const label = row[2].trim().toLowerCase();
+                if (label.includes('community')) fed.community.population = (row[3] || '').trim() || null;
+                else if (label.includes('annual budget')) fed.community.annualBudget = (row[3] || '').trim() || null;
+                else if (label.includes('control') || label.includes('support')) {
+                    if (!fed.community.controls) fed.community.controls = (row[3] || '').trim() || null;
+                    else detailParts.push((row[3] || '').trim());
+                }
+                else if (label.includes('summer')) fed.community.summerCamps = (row[3] || '').trim() || null;
+            } else if (row[3] && !row[2]) {
+                detailParts.push(row[3].trim());
+            }
+
+            // Category tracking
+            if (row[4]) {
+                currentCat = normCat(row[4]);
+            }
+
+            // People
+            if (row[5]) {
+                fed.people.push({
+                    id: m.id + '-p-' + String(pIdx++).padStart(3, '0'),
+                    name: row[5].trim(),
+                    role: (row[6] || '').trim().replace(/\n/g, ''),
+                    category: currentCat,
+                    email: '', phone: '', notes: ''
+                });
+            }
+
+            // Allocations
+            if (row[7]) {
+                const note = extractNote(row[8]) || extractNote(row[7]);
+                fed.allocations.push({
+                    id: m.id + '-a-' + String(aIdx++).padStart(3, '0'),
+                    program: row[7].trim(),
+                    amount_24_25: parseAmt(row[8]),
+                    amount_25_26: parseAmt(row[9]),
+                    amount_26_27: null,
+                    notes: note
+                });
+            }
+
+            // Shlichut
+            if (row[10]) {
+                const s = row[10].trim();
+                if (s && !fed.shlichut.includes(s)) fed.shlichut.push(s);
+            }
+
+            // JAFI Programs
+            if (row[11]) {
+                const p = row[11].trim();
+                if (p && !fed.jafiPrograms.includes(p)) fed.jafiPrograms.push(p);
+            }
+
+            // Opportunities
+            if (row[0]) {
+                const opp = row[0].trim();
+                if (opp && !fed.opportunities.includes(opp)) fed.opportunities.push(opp);
+            }
+            if (row[1]) {
+                const prog = row[1].trim();
+                if (prog && !fed.opportunities.includes(prog)) fed.opportunities.push(prog);
+            }
+
+            // Visits
+            if (row[12]) {
+                fed.visits.push({
+                    id: m.id + '-v-' + String(vIdx++).padStart(3, '0'),
+                    date: row[12].trim(),
+                    description: (row[13] || '').trim(),
+                    notes: (row[14] || '').trim()
+                });
+            }
+        }
+
+        if (detailParts.length > 0) {
+            fed.community.details = detailParts.join(' | ');
+        }
+
+        result.federations[m.id] = fed;
+    }
+
+    return result;
+}
+
+// =============================================
+// LOCALSTORAGE
+// =============================================
+const STORAGE_KEY = 'federation-dashboard-v3';
+
+const store = {
+    save(data) {
+        data._lastModified = new Date().toISOString();
+        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch(e) { console.error('Save failed:', e); }
+    },
+    load() {
+        try {
+            const raw = localStorage.getItem(STORAGE_KEY);
+            return raw ? JSON.parse(raw) : null;
+        } catch(e) { return null; }
+    },
+    clear() { localStorage.removeItem(STORAGE_KEY); }
+};
+
+function mergeLegacyStorage(data) {
+    const regionMap = {
+        'The Associated - Baltimore': 'baltimore',
+        'Philadelphia': 'philadelphia',
+        'GMW': 'gmw',
+        'NNJ': 'nnj',
+        'CJP': 'cjp',
+        'Rochester': 'rochester'
+    };
+    let found = false;
+    for (const [oldName, newId] of Object.entries(regionMap)) {
+        const fed = data.federations[newId];
+        if (!fed) continue;
+        // Notes
+        const notes = localStorage.getItem('notes-' + oldName);
+        if (notes) { fed.notes = notes; localStorage.removeItem('notes-' + oldName); found = true; }
+        // Added people
+        const people = localStorage.getItem('people-' + oldName);
+        if (people) {
+            try {
+                const arr = JSON.parse(people);
+                arr.forEach(p => {
+                    fed.people.push({
+                        id: genId(newId + '-p'),
+                        name: p.name || '', role: p.role || '', category: normCat(p.affiliation) || 'Federation',
+                        email: '', phone: '', notes: ''
+                    });
+                });
+                localStorage.removeItem('people-' + oldName);
+                found = true;
+            } catch(e) {}
+        }
+        // Added visits
+        const visits = localStorage.getItem('visits-' + oldName);
+        if (visits) {
+            try {
+                const arr = JSON.parse(visits);
+                arr.forEach(v => {
+                    fed.visits.push({
+                        id: genId(newId + '-v'),
+                        date: v.date || '', description: v.schedule || '', notes: ''
+                    });
+                });
+                localStorage.removeItem('visits-' + oldName);
+                found = true;
+            } catch(e) {}
+        }
+    }
+    return found;
+}
+
+// =============================================
+// ALPINE.JS COMPONENT
+// =============================================
+document.addEventListener('alpine:init', () => {
+    Alpine.data('dashboard', () => ({
+        data: null,
+        searchTerm: '',
+        activeRegion: 'All',
+        expanded: {},
+        sections: {},
+        saveIndicator: false,
+
+        // Modal state
+        showAddPersonModal: false,
+        showEditPersonModal: false,
+        showAddVisitModal: false,
+        showAddAllocModal: false,
+        showAddFedModal: false,
+        showImportModal: false,
+        currentFedId: null,
+
+        // Form models
+        newPerson: { name: '', role: '', category: 'Federation', email: '', phone: '' },
+        editingPerson: { id: '', name: '', role: '', category: 'Federation', email: '', phone: '' },
+        newVisit: { date: '', description: '', notes: '' },
+        newAlloc: { program: '', amount_24_25: '', amount_25_26: '', amount_26_27: '' },
+        newFed: { name: '', region: 'NE' },
+
+        _saveTimer: null,
+
+        init() {
+            const saved = store.load();
+            if (saved && saved.federations) {
+                this.data = saved;
+            } else {
+                this.data = migrateRawData(RAW_DATA);
+                mergeLegacyStorage(this.data);
+                store.save(this.data);
+            }
+            // Expand first federation by default
+            const firstId = this.allFederations[0]?.id;
+            if (firstId) this.expanded[firstId] = true;
+        },
+
+        // Computed
+        get allFederations() {
+            if (!this.data) return [];
+            return Object.values(this.data.federations);
+        },
+
+        get filteredFederations() {
+            let feds = this.allFederations;
+            if (this.activeRegion !== 'All') {
+                feds = feds.filter(f => f.id === this.activeRegion);
+            }
+            if (this.searchTerm.trim()) {
+                const term = this.searchTerm.toLowerCase();
+                feds = feds.filter(f => this.matchFed(f, term));
+            }
+            return feds;
+        },
+
+        get stats() {
+            const feds = this.allFederations;
+            return {
+                totalFederations: feds.length,
+                totalPeople: feds.reduce((s, f) => s + f.people.length, 0),
+                totalAlloc24: feds.reduce((s, f) => s + f.allocations.reduce((a, x) => a + (x.amount_24_25 || 0), 0), 0),
+                totalAlloc25: feds.reduce((s, f) => s + f.allocations.reduce((a, x) => a + (x.amount_25_26 || 0), 0), 0),
+                totalAlloc26: feds.reduce((s, f) => s + f.allocations.reduce((a, x) => a + (x.amount_26_27 || 0), 0), 0),
+                totalVisits: feds.reduce((s, f) => s + f.visits.length, 0)
+            };
+        },
+
+        // Helpers
+        fmtCur, parseAmt,
+
+        matchFed(fed, term) {
+            if (fed.name.toLowerCase().includes(term)) return true;
+            if (fed.people.some(p => (p.name + ' ' + p.role).toLowerCase().includes(term))) return true;
+            if (fed.allocations.some(a => a.program.toLowerCase().includes(term))) return true;
+            if (fed.visits.some(v => (v.date + ' ' + v.description).toLowerCase().includes(term))) return true;
+            if (fed.opportunities.some(o => o.toLowerCase().includes(term))) return true;
+            if ((fed.notes || '').toLowerCase().includes(term)) return true;
+            const com = fed.community;
+            if ([com.population, com.annualBudget, com.controls, com.details].some(v => v && v.toLowerCase().includes(term))) return true;
+            return false;
+        },
+
+        sumAlloc(fed, year) {
+            return fed.allocations.reduce((s, a) => s + (a['amount_' + year] || 0), 0);
+        },
+
+        getCategories(fed) {
+            const order = ['Federation', 'Israel Office', 'BOG', 'Cabinet', 'Lay Leaders', 'Community'];
+            const present = new Set(fed.people.map(p => p.category));
+            return order.filter(c => present.has(c));
+        },
+
+        toggleFed(id) {
+            this.expanded[id] = !this.expanded[id];
+        },
+
+        toggleSection(fedId, section) {
+            const key = fedId + '-' + section;
+            this.sections[key] = this.sections[key] === false ? true : false;
+        },
+
+        autoSave() {
+            clearTimeout(this._saveTimer);
+            this._saveTimer = setTimeout(() => {
+                store.save(this.data);
+                this.flashSave();
+            }, 400);
+        },
+
+        flashSave() {
+            this.saveIndicator = true;
+            setTimeout(() => this.saveIndicator = false, 1200);
+        },
+
+        // CRUD - People
+        addPerson() {
+            if (!this.newPerson.name.trim()) return alert('Please enter a name');
+            const fed = this.data.federations[this.currentFedId];
+            if (!fed) return;
+            fed.people.push({
+                id: genId(this.currentFedId + '-p'),
+                name: this.newPerson.name.trim(),
+                role: this.newPerson.role.trim(),
+                category: this.newPerson.category,
+                email: this.newPerson.email.trim(),
+                phone: this.newPerson.phone.trim(),
+                notes: ''
+            });
+            this.newPerson = { name: '', role: '', category: 'Federation', email: '', phone: '' };
+            this.showAddPersonModal = false;
+            this.autoSave();
+        },
+
+        saveEditPerson() {
+            const fed = this.data.federations[this.currentFedId];
+            if (!fed) return;
+            const idx = fed.people.findIndex(p => p.id === this.editingPerson.id);
+            if (idx === -1) return;
+            fed.people[idx] = { ...this.editingPerson };
+            this.showEditPersonModal = false;
+            this.autoSave();
+        },
+
+        removePerson(fedId, personId) {
+            if (!confirm('Remove this person?')) return;
+            const fed = this.data.federations[fedId];
+            fed.people = fed.people.filter(p => p.id !== personId);
+            this.autoSave();
+        },
+
+        // CRUD - Visits
+        addVisit() {
+            if (!this.newVisit.date.trim()) return alert('Please enter a date');
+            const fed = this.data.federations[this.currentFedId];
+            if (!fed) return;
+            fed.visits.push({
+                id: genId(this.currentFedId + '-v'),
+                date: this.newVisit.date.trim(),
+                description: this.newVisit.description.trim(),
+                notes: this.newVisit.notes.trim()
+            });
+            this.newVisit = { date: '', description: '', notes: '' };
+            this.showAddVisitModal = false;
+            this.autoSave();
+        },
+
+        removeVisit(fedId, visitId) {
+            if (!confirm('Remove this visit?')) return;
+            const fed = this.data.federations[fedId];
+            fed.visits = fed.visits.filter(v => v.id !== visitId);
+            this.autoSave();
+        },
+
+        // CRUD - Allocations
+        addAllocation() {
+            if (!this.newAlloc.program.trim()) return alert('Please enter a program name');
+            const fed = this.data.federations[this.currentFedId];
+            if (!fed) return;
+            fed.allocations.push({
+                id: genId(this.currentFedId + '-a'),
+                program: this.newAlloc.program.trim(),
+                amount_24_25: parseAmt(this.newAlloc.amount_24_25),
+                amount_25_26: parseAmt(this.newAlloc.amount_25_26),
+                amount_26_27: parseAmt(this.newAlloc.amount_26_27),
+                notes: ''
+            });
+            this.newAlloc = { program: '', amount_24_25: '', amount_25_26: '', amount_26_27: '' };
+            this.showAddAllocModal = false;
+            this.autoSave();
+        },
+
+        removeAllocation(fedId, allocId) {
+            if (!confirm('Remove this allocation?')) return;
+            const fed = this.data.federations[fedId];
+            fed.allocations = fed.allocations.filter(a => a.id !== allocId);
+            this.autoSave();
+        },
+
+        // CRUD - Federation
+        addFederation() {
+            if (!this.newFed.name.trim()) return alert('Please enter a name');
+            const id = this.newFed.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/-+$/, '');
+            if (this.data.federations[id]) return alert('A federation with a similar name already exists');
+            this.data.federations[id] = {
+                id, name: this.newFed.name.trim(), region: this.newFed.region || 'NE',
+                community: { population: null, annualBudget: null, controls: null, details: null, summerCamps: null },
+                people: [], allocations: [], shlichut: [], jafiPrograms: [],
+                opportunities: [], visits: [], notes: ''
+            };
+            this.expanded[id] = true;
+            this.newFed = { name: '', region: 'NE' };
+            this.showAddFedModal = false;
+            this.autoSave();
+        },
+
+        // Export
+        exportToExcel() {
+            const wb = XLSX.utils.book_new();
+            const summaryRows = [
+                ['NE Regional Director - Federation Dashboard'],
+                ['Export Date: ' + new Date().toLocaleDateString()],
+                [],
+                ['Federation', 'People', 'Alloc 24-25', 'Alloc 25-26', 'Alloc 26-27', 'Visits']
+            ];
+
+            for (const fed of this.allFederations) {
+                summaryRows.push([
+                    fed.name,
+                    fed.people.length,
+                    fmtCur(this.sumAlloc(fed, '24_25')),
+                    fmtCur(this.sumAlloc(fed, '25_26')),
+                    fmtCur(this.sumAlloc(fed, '26_27')),
+                    fed.visits.length
+                ]);
+
+                const rows = [];
+                rows.push(['=== COMMUNITY INFO ===']);
+                rows.push(['Population', fed.community.population || '']);
+                rows.push(['Annual Budget', fed.community.annualBudget || '']);
+                rows.push(['Controls', fed.community.controls || '']);
+                rows.push(['Details', fed.community.details || '']);
+                rows.push(['Summer Camps', fed.community.summerCamps || '']);
+                rows.push([]);
+
+                rows.push(['=== KEY PEOPLE ===']);
+                rows.push(['Name', 'Role', 'Category', 'Email', 'Phone']);
+                fed.people.forEach(p => rows.push([p.name, p.role, p.category, p.email, p.phone]));
+                rows.push([]);
+
+                rows.push(['=== ALLOCATIONS ===']);
+                rows.push(['Program', '2024-25', '2025-26', '2026-27', 'Notes']);
+                fed.allocations.forEach(a => rows.push([a.program, a.amount_24_25 || '', a.amount_25_26 || '', a.amount_26_27 || '', a.notes || '']));
+                rows.push([]);
+
+                rows.push(['=== VISITS ===']);
+                rows.push(['Date', 'Description', 'Notes']);
+                fed.visits.forEach(v => rows.push([v.date, v.description, v.notes]));
+                rows.push([]);
+
+                rows.push(['=== SHLICHUT ===']);
+                fed.shlichut.forEach(s => rows.push([s]));
+                rows.push([]);
+
+                rows.push(['=== JAFI PROGRAMS ===']);
+                fed.jafiPrograms.forEach(p => rows.push([p]));
+                rows.push([]);
+
+                rows.push(['=== OPPORTUNITIES ===']);
+                fed.opportunities.forEach(o => rows.push([o]));
+                rows.push([]);
+
+                if (fed.notes) { rows.push(['=== NOTES ===']); rows.push([fed.notes]); }
+
+                const ws = XLSX.utils.aoa_to_sheet(rows);
+                ws['!cols'] = [{ wch: 35 }, { wch: 25 }, { wch: 20 }, { wch: 15 }, { wch: 15 }];
+                const sheetName = fed.name.substring(0, 31).replace(/[:\\/?*\[\]]/g, '');
+                XLSX.utils.book_append_sheet(wb, ws, sheetName);
+            }
+
+            const summaryWs = XLSX.utils.aoa_to_sheet(summaryRows);
+            summaryWs['!cols'] = [{ wch: 35 }, { wch: 10 }, { wch: 15 }, { wch: 15 }, { wch: 15 }, { wch: 10 }];
+            XLSX.utils.book_append_sheet(wb, summaryWs, 'Summary', true);
+
+            XLSX.writeFile(wb, 'Federation_Dashboard_' + new Date().toISOString().split('T')[0] + '.xlsx');
+        },
+
+        exportToJSON() {
+            const blob = new Blob([JSON.stringify(this.data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'federation-dashboard-backup-' + new Date().toISOString().split('T')[0] + '.json';
+            a.click();
+            URL.revokeObjectURL(url);
+        },
+
+        importFromJSON(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const imported = JSON.parse(e.target.result);
+                    if (!imported.federations) throw new Error('Invalid format');
+                    if (!confirm('This will replace all current data. Continue?')) return;
+                    this.data = imported;
+                    store.save(this.data);
+                    this.showImportModal = false;
+                    this.flashSave();
+                } catch(err) {
+                    alert('Invalid JSON file: ' + err.message);
+                }
+            };
+            reader.readAsText(file);
+        },
+
+        resetData() {
+            if (!confirm('Reset ALL data to the original dataset? This cannot be undone.')) return;
+            if (!confirm('Are you absolutely sure? All your edits, added people, visits, and notes will be lost.')) return;
+            store.clear();
+            this.data = migrateRawData(RAW_DATA);
+            store.save(this.data);
+            this.flashSave();
+        }
+    }));
+});
+</script>
+
+</body>
+</html>
