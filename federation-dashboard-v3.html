@@ -851,8 +851,45 @@ function genId(prefix) { return prefix + '-' + Date.now().toString(36) + Math.ra
 function normCat(raw) { if (!raw) return 'Federation'; const l = raw.toLowerCase(); if (l.includes('bog')) return 'BOG'; if (l.includes('israel')) return 'Israel Office'; if (l.includes('cabinet')) return 'Cabinet'; if (l.includes('lay lead')) return 'Lay Leaders'; if (l.includes('community') && !l.includes('community ')) return 'Community'; return 'Federation'; }
 
 // =============================================
-// CONTACT INFO (verified from federation websites Feb 2026)
+// PEOPLE CORRECTIONS (verified from federation websites Feb 2026)
 // =============================================
+// Name corrections: oldName -> newName
+const NAME_CORRECTIONS = {
+    "Andrew Kushnir": "Andrew Cushnir",
+    "Aharon Levitt": "Rabbi Aaron Levitt",
+    "Sara Salomon": "Sarah Bernstein Solomon",
+    "Sara Lefkowits": "Sarah Lefkowitz",
+    "Amy Bilun": "Amy Biloon",
+    "Lior Krangel": "Lior Krengel",
+    "Randy": "Randy Schuster"
+};
+// Title corrections: name -> correct title
+const TITLE_CORRECTIONS = {
+    "Andrew Cushnir": "President and CEO",
+    "Ruth Miller": "Chief Planning Officer, Community Planning & Allocations",
+    "Michelle Ostroff": "Senior Vice President, Annual Campaign",
+    "Rabbi Aaron Levitt": "Executive Director, Jewish Educational Services (JES)",
+    "Gabrielle Burger": "Senior Director, Jewish Experiences (Jewish Connection Network)",
+    "Michael Balaban": "President & CEO",
+    "Kelly Romirowsky": "Chief Strategy & Impact Officer",
+    "Sarah Bernstein Solomon": "Chief Development Officer",
+    "Jason Holtzman": "Chief of Jewish Community Relations Council (JCRC)",
+    "Sarah Lefkowitz": "NextGen Director",
+    "Meredith Dragon": "Executive Vice President and CEO",
+    "Rebecca Pollack": "VP, Development",
+    "Michal Werner": "Executive Director, Jewish Community Foundation of Greater MetroWest NJ (since Jul 2025)",
+    "Tracy Levin": "Director, One Happy Camper NJ",
+    "Amy Biloon": "Chief Community Engagement Officer",
+    "Jason Shames": "CEO and Executive Vice President",
+    "Rami Feinstein": "Director, Center for Israel Engagement",
+    "Debbie Katz": "Principal Gifts Officer",
+    "Lior Krengel": "Director, CJP Israel Office",
+    "Leah Goldman": "Chief Planning & Program Officer",
+    "Michal Spivak": "Director of ShinShinim Programming",
+    "Efrat Petel": "Director, Israel & Global Jewry",
+    "Randy Schuster": "President (2025-2026)"
+};
+// Contact info: name -> { email, phone }
 const CONTACT_INFO = {
     "Andrew Cushnir": { email: "", phone: "410-727-4828" },
     "Gabrielle Burger": { email: "gburger@thejewishnetwork.org", phone: "410-735-5004" },
@@ -950,8 +987,18 @@ function ensureNewFields(data) {
         }
         // Ensure all visits have a documents array
         if (fed.visits) { for (const v of fed.visits) { if (!v.documents) v.documents = []; } }
-        // Merge contact info into existing people if email/phone are empty
-        if (fed.people) { for (const p of fed.people) { const ci = CONTACT_INFO[p.name]; if (ci) { if (!p.email && ci.email) p.email = ci.email; if (!p.phone && ci.phone) p.phone = ci.phone; } } }
+        // Apply name corrections, title corrections, and contact info to people
+        if (fed.people) {
+            for (const p of fed.people) {
+                // Fix name if needed
+                if (NAME_CORRECTIONS[p.name]) p.name = NAME_CORRECTIONS[p.name];
+                // Fix title if needed
+                if (TITLE_CORRECTIONS[p.name]) p.role = TITLE_CORRECTIONS[p.name];
+                // Merge contact info if empty
+                const ci = CONTACT_INFO[p.name];
+                if (ci) { if (!p.email && ci.email) p.email = ci.email; if (!p.phone && ci.phone) p.phone = ci.phone; }
+            }
+        }
     }
 }
 
