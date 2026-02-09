@@ -865,11 +865,24 @@ function mergeLegacyStorage(data) {
     }
 }
 
-// Ensure backward compat: add websiteInfo/communityEvents to saved data if missing
+// Ensure backward compat: add websiteInfo/communityEvents/financials to saved data if missing
 function ensureNewFields(data) {
     for (const fed of Object.values(data.federations)) {
-        if (!fed.websiteInfo) { fed.websiteInfo = WEBSITE_DATA[fed.id] ? WEBSITE_DATA[fed.id].websiteInfo : { website:'', address:'', phone:'', email:'', mission:'', focusAreas:[], programs:[], charityRating:'', givingOptions:[] }; }
-        if (!fed.communityEvents) { fed.communityEvents = WEBSITE_DATA[fed.id] ? WEBSITE_DATA[fed.id].communityEvents : []; }
+        const src = WEBSITE_DATA[fed.id];
+        if (!fed.websiteInfo) { fed.websiteInfo = src ? src.websiteInfo : { website:'', address:'', phone:'', email:'', mission:'', focusAreas:[], programs:[], charityRating:'', givingOptions:[] }; }
+        if (!fed.communityEvents) { fed.communityEvents = src ? src.communityEvents : []; }
+        // Merge financials into existing websiteInfo if missing
+        if (fed.websiteInfo && !fed.websiteInfo.financials && src && src.websiteInfo && src.websiteInfo.financials) {
+            fed.websiteInfo.financials = src.websiteInfo.financials;
+        }
+        // Merge any missing websiteInfo fields from source
+        if (fed.websiteInfo && src && src.websiteInfo) {
+            for (const key of Object.keys(src.websiteInfo)) {
+                if (fed.websiteInfo[key] === undefined || fed.websiteInfo[key] === '' || (Array.isArray(fed.websiteInfo[key]) && fed.websiteInfo[key].length === 0)) {
+                    fed.websiteInfo[key] = src.websiteInfo[key];
+                }
+            }
+        }
     }
 }
 
