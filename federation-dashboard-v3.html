@@ -851,6 +851,38 @@ function genId(prefix) { return prefix + '-' + Date.now().toString(36) + Math.ra
 function normCat(raw) { if (!raw) return 'Federation'; const l = raw.toLowerCase(); if (l.includes('bog')) return 'BOG'; if (l.includes('israel')) return 'Israel Office'; if (l.includes('cabinet')) return 'Cabinet'; if (l.includes('lay lead')) return 'Lay Leaders'; if (l.includes('community') && !l.includes('community ')) return 'Community'; return 'Federation'; }
 
 // =============================================
+// CONTACT INFO (verified from federation websites Feb 2026)
+// =============================================
+const CONTACT_INFO = {
+    "Andrew Cushnir": { email: "", phone: "410-727-4828" },
+    "Gabrielle Burger": { email: "gburger@thejewishnetwork.org", phone: "410-735-5004" },
+    "Michael Balaban": { email: "ceo@jewishphilly.org", phone: "215-832-0500" },
+    "Jeffrey Lasday": { email: "", phone: "" },
+    "Kelly Romirowsky": { email: "", phone: "" },
+    "Alix Caplan": { email: "acaplan@jewishphilly.org", phone: "" },
+    "Sarah Bernstein Solomon": { email: "", phone: "" },
+    "Jason Holtzman": { email: "", phone: "" },
+    "Sarah Lefkowitz": { email: "slefkowitz@jewishphilly.org", phone: "215-832-0515" },
+    "Meredith Dragon": { email: "", phone: "973-929-3066" },
+    "Benjamin Mann": { email: "", phone: "" },
+    "Rebecca Pollack": { email: "", phone: "" },
+    "Amy Biloon": { email: "", phone: "" },
+    "Jason Shames": { email: "JasonS@jfnnj.org", phone: "201-820-3910" },
+    "Sheryl Sarin": { email: "SherylS@jfnnj.org", phone: "201-820-3913" },
+    "Rami Feinstein": { email: "", phone: "" },
+    "Ilana Berman": { email: "", phone: "" },
+    "Noam Bentov": { email: "", phone: "" },
+    "Ariel Libhaber": { email: "", phone: "" },
+    "Leah Goldman": { email: "lgoldman@jewishrochester.org", phone: "585-241-8635" },
+    "Michal Spivak": { email: "mspivak@jewishrochester.org", phone: "585-241-8611" },
+    "Efrat Petel": { email: "epetel@jewishrochester.org", phone: "585-241-8651" },
+    "Jeanine Monachino": { email: "jmonachino@jewishrochester.org", phone: "585-241-8630" },
+    "Debbie Goldberg": { email: "dgoldberg@jewishrochester.org", phone: "585-241-8627" },
+    "Randy Schuster": { email: "", phone: "" },
+    "Ted Axelrod": { email: "taxelrod@jewishrochester.org", phone: "585-241-8629" }
+};
+
+// =============================================
 // DATA MIGRATION
 // =============================================
 function migrateRawData(raw) {
@@ -864,7 +896,7 @@ function migrateRawData(raw) {
         for (const row of rows) {
             if (row[2]) { const label = row[2].trim().toLowerCase(); if (label.includes('community')) fed.community.population = (row[3]||'').trim()||null; else if (label.includes('annual budget')) fed.community.annualBudget = (row[3]||'').trim()||null; else if (label.includes('control') || label.includes('support')) { if (!fed.community.controls) fed.community.controls = (row[3]||'').trim()||null; else detailParts.push((row[3]||'').trim()); } else if (label.includes('summer')) fed.community.summerCamps = (row[3]||'').trim()||null; } else if (row[3] && !row[2]) { detailParts.push(row[3].trim()); }
             if (row[4]) currentCat = normCat(row[4]);
-            if (row[5]) fed.people.push({ id: m.id+'-p-'+String(pIdx++).padStart(3,'0'), name: row[5].trim(), role: (row[6]||'').trim().replace(/\n/g,''), category: currentCat, email:'', phone:'', notes:'' });
+            if (row[5]) { const pName = row[5].trim(); const ci = CONTACT_INFO[pName] || {}; fed.people.push({ id: m.id+'-p-'+String(pIdx++).padStart(3,'0'), name: pName, role: (row[6]||'').trim().replace(/\n/g,''), category: currentCat, email: ci.email||'', phone: ci.phone||'', notes:'' }); }
             if (row[7]) { const note = extractNote(row[8]) || extractNote(row[7]); fed.allocations.push({ id: m.id+'-a-'+String(aIdx++).padStart(3,'0'), program: row[7].trim(), amount_24_25: parseAmt(row[8]), amount_25_26: parseAmt(row[9]), amount_26_27: null, notes: note }); }
             if (row[10]) { const s = row[10].trim(); if (s && !fed.shlichut.includes(s)) fed.shlichut.push(s); }
             if (row[11]) { const p = row[11].trim(); if (p && !fed.jafiPrograms.includes(p)) fed.jafiPrograms.push(p); }
@@ -918,6 +950,8 @@ function ensureNewFields(data) {
         }
         // Ensure all visits have a documents array
         if (fed.visits) { for (const v of fed.visits) { if (!v.documents) v.documents = []; } }
+        // Merge contact info into existing people if email/phone are empty
+        if (fed.people) { for (const p of fed.people) { const ci = CONTACT_INFO[p.name]; if (ci) { if (!p.email && ci.email) p.email = ci.email; if (!p.phone && ci.phone) p.phone = ci.phone; } } }
     }
 }
 
