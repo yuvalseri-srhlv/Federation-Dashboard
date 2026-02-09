@@ -439,13 +439,30 @@
                         </div>
                         <div x-show="sections[fed.id+'-visits'] !== false" class="space-y-2">
                             <template x-for="visit in fed.visits" :key="visit.id">
-                                <div class="bg-brand-50 border-l-4 border-brand-500 rounded-r-lg p-3 flex justify-between items-start group">
-                                    <div>
-                                        <div class="font-semibold text-brand-600" x-text="visit.date"></div>
-                                        <div class="text-gray-600 text-sm" x-text="visit.description"></div>
-                                        <template x-if="visit.notes"><div class="text-gray-400 text-xs mt-1 italic" x-text="visit.notes"></div></template>
+                                <div class="bg-brand-50 border-l-4 border-brand-500 rounded-r-lg p-3 group">
+                                    <div class="flex justify-between items-start">
+                                        <div class="flex-1">
+                                            <div class="font-semibold text-brand-600" x-text="visit.date"></div>
+                                            <div class="text-gray-600 text-sm" x-text="visit.description"></div>
+                                            <template x-if="visit.notes"><div class="text-gray-400 text-xs mt-1 italic" x-text="visit.notes"></div></template>
+                                        </div>
+                                        <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition no-print ml-2 shrink-0">
+                                            <button @click="attachToVisit(fed.id, visit.id)" class="text-brand-400 hover:text-brand-600 text-lg" title="Attach document">&#128206;</button>
+                                            <button @click="removeVisit(fed.id, visit.id)" class="text-red-400 hover:text-red-600">&times;</button>
+                                        </div>
                                     </div>
-                                    <button @click="removeVisit(fed.id, visit.id)" class="text-red-400 hover:text-red-600 opacity-0 group-hover:opacity-100 transition no-print ml-2 shrink-0">&times;</button>
+                                    <template x-if="visit.documents && visit.documents.length > 0">
+                                        <div class="mt-2 flex flex-wrap gap-2">
+                                            <template x-for="doc in visit.documents" :key="doc.id">
+                                                <div class="inline-flex items-center gap-1.5 bg-white border border-brand-200 rounded-lg px-3 py-1.5 text-xs group/doc">
+                                                    <span class="text-brand-500">&#128196;</span>
+                                                    <button @click="downloadDocument(doc)" class="text-brand-600 font-medium hover:underline truncate max-w-[180px]" x-text="doc.name" :title="doc.name"></button>
+                                                    <span class="text-gray-400" x-text="'(' + formatFileSize(doc.size) + ')'"></span>
+                                                    <button @click="removeDocument(fed.id, visit.id, doc.id)" class="text-red-400 hover:text-red-600 opacity-0 group-hover/doc:opacity-100 transition no-print">&times;</button>
+                                                </div>
+                                            </template>
+                                        </div>
+                                    </template>
                                 </div>
                             </template>
                             <template x-if="fed.visits.length === 0"><p class="text-gray-400 text-sm italic">No visits scheduled</p></template>
@@ -565,10 +582,24 @@
                 <input x-model="newVisit.date" placeholder="Date (e.g., March 15, 2026) *" class="w-full border-2 border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:border-brand-500">
                 <textarea x-model="newVisit.description" placeholder="Description / Schedule" rows="3" class="w-full border-2 border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:border-brand-500"></textarea>
                 <textarea x-model="newVisit.notes" placeholder="Notes (optional)" rows="2" class="w-full border-2 border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:border-brand-500"></textarea>
+                <div>
+                    <label class="text-sm font-medium text-gray-600 block mb-1">Attach Documents (PDF, Word)</label>
+                    <input type="file" accept=".pdf,.doc,.docx" multiple @change="handleVisitFiles($event)" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-brand-50 file:text-brand-600 hover:file:bg-brand-100 cursor-pointer">
+                    <template x-if="pendingFiles.length > 0">
+                        <div class="mt-2 space-y-1">
+                            <template x-for="(f, idx) in pendingFiles" :key="idx">
+                                <div class="flex items-center justify-between bg-gray-50 rounded px-3 py-1.5 text-sm">
+                                    <span class="truncate mr-2"><span class="mr-1">&#128196;</span><span x-text="f.name"></span> <span class="text-gray-400" x-text="'(' + formatFileSize(f.size) + ')'"></span></span>
+                                    <button @click="pendingFiles.splice(idx, 1)" class="text-red-400 hover:text-red-600 shrink-0">&times;</button>
+                                </div>
+                            </template>
+                        </div>
+                    </template>
+                </div>
             </div>
             <div class="flex gap-3 mt-5">
                 <button @click="addVisit()" class="flex-1 bg-brand-500 hover:bg-brand-600 text-white py-2 rounded-lg font-medium transition">Add Visit</button>
-                <button @click="showAddVisitModal=false" class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 py-2 rounded-lg font-medium transition">Cancel</button>
+                <button @click="pendingFiles=[]; showAddVisitModal=false" class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 py-2 rounded-lg font-medium transition">Cancel</button>
             </div>
         </div>
     </div>
@@ -837,7 +868,7 @@ function migrateRawData(raw) {
             if (row[11]) { const p = row[11].trim(); if (p && !fed.jafiPrograms.includes(p)) fed.jafiPrograms.push(p); }
             if (row[0]) { const opp = row[0].trim(); if (opp && !fed.opportunities.includes(opp)) fed.opportunities.push(opp); }
             if (row[1]) { const prog = row[1].trim(); if (prog && !fed.opportunities.includes(prog)) fed.opportunities.push(prog); }
-            if (row[12]) fed.visits.push({ id: m.id+'-v-'+String(vIdx++).padStart(3,'0'), date: row[12].trim(), description: (row[13]||'').trim(), notes: (row[14]||'').trim() });
+            if (row[12]) fed.visits.push({ id: m.id+'-v-'+String(vIdx++).padStart(3,'0'), date: row[12].trim(), description: (row[13]||'').trim(), notes: (row[14]||'').trim(), documents: [] });
         }
         if (detailParts.length > 0) fed.community.details = detailParts.join(' | ');
         if (WEBSITE_DATA[m.id]) { fed.websiteInfo = WEBSITE_DATA[m.id].websiteInfo; fed.communityEvents = WEBSITE_DATA[m.id].communityEvents; }
@@ -851,7 +882,7 @@ function migrateRawData(raw) {
 // =============================================
 const STORAGE_KEY = 'federation-dashboard-v3';
 const store = {
-    save(data) { data._lastModified = new Date().toISOString(); try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch(e) { console.error('Save failed:', e); } },
+    save(data) { data._lastModified = new Date().toISOString(); try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch(e) { console.error('Save failed:', e); if (e.name === 'QuotaExceededError') alert('Storage is full! Consider removing large document attachments or exporting a JSON backup. The last change was NOT saved.'); } },
     load() { try { const raw = localStorage.getItem(STORAGE_KEY); return raw ? JSON.parse(raw) : null; } catch(e) { return null; } },
     clear() { localStorage.removeItem(STORAGE_KEY); }
 };
@@ -883,6 +914,8 @@ function ensureNewFields(data) {
                 }
             }
         }
+        // Ensure all visits have a documents array
+        if (fed.visits) { for (const v of fed.visits) { if (!v.documents) v.documents = []; } }
     }
 }
 
@@ -895,7 +928,7 @@ document.addEventListener('alpine:init', () => {
         showAddPersonModal: false, showEditPersonModal: false, showAddVisitModal: false, showAddAllocModal: false, showAddFedModal: false, showImportModal: false, showAddEventModal: false, currentFedId: null,
         newPerson: { name:'', role:'', category:'Federation', email:'', phone:'' },
         editingPerson: { id:'', name:'', role:'', category:'Federation', email:'', phone:'' },
-        newVisit: { date:'', description:'', notes:'' },
+        newVisit: { date:'', description:'', notes:'' }, pendingFiles: [],
         newAlloc: { program:'', amount_24_25:'', amount_25_26:'', amount_26_27:'' },
         newFed: { name:'', region:'NE' },
         newEvent: { name:'', date:'', time:'', location:'', cost:'', description:'', category:'Other' },
@@ -939,7 +972,7 @@ document.addEventListener('alpine:init', () => {
             if (fed.name.toLowerCase().includes(term)) return true;
             if (fed.people.some(p => (p.name+' '+p.role).toLowerCase().includes(term))) return true;
             if (fed.allocations.some(a => a.program.toLowerCase().includes(term))) return true;
-            if (fed.visits.some(v => (v.date+' '+v.description).toLowerCase().includes(term))) return true;
+            if (fed.visits.some(v => (v.date+' '+v.description+' '+(v.documents||[]).map(d=>d.name).join(' ')).toLowerCase().includes(term))) return true;
             if (fed.opportunities.some(o => o.toLowerCase().includes(term))) return true;
             if ((fed.notes||'').toLowerCase().includes(term)) return true;
             const com = fed.community;
@@ -961,8 +994,16 @@ document.addEventListener('alpine:init', () => {
         saveEditPerson() { const fed = this.data.federations[this.currentFedId]; if (!fed) return; const idx = fed.people.findIndex(p => p.id === this.editingPerson.id); if (idx === -1) return; fed.people[idx] = { ...this.editingPerson }; this.showEditPersonModal = false; this.autoSave(); },
         removePerson(fedId, personId) { if (!confirm('Remove this person?')) return; this.data.federations[fedId].people = this.data.federations[fedId].people.filter(p => p.id !== personId); this.autoSave(); },
 
-        addVisit() { if (!this.newVisit.date.trim()) return alert('Please enter a date'); const fed = this.data.federations[this.currentFedId]; if (!fed) return; fed.visits.push({ id: genId(this.currentFedId+'-v'), date: this.newVisit.date.trim(), description: this.newVisit.description.trim(), notes: this.newVisit.notes.trim() }); this.newVisit = { date:'', description:'', notes:'' }; this.showAddVisitModal = false; this.autoSave(); },
+        async addVisit() { if (!this.newVisit.date.trim()) return alert('Please enter a date'); const fed = this.data.federations[this.currentFedId]; if (!fed) return; const docs = await this.readFilesAsBase64(this.pendingFiles); fed.visits.push({ id: genId(this.currentFedId+'-v'), date: this.newVisit.date.trim(), description: this.newVisit.description.trim(), notes: this.newVisit.notes.trim(), documents: docs }); this.newVisit = { date:'', description:'', notes:'' }; this.pendingFiles = []; this.showAddVisitModal = false; this.autoSave(); },
         removeVisit(fedId, visitId) { if (!confirm('Remove this visit?')) return; this.data.federations[fedId].visits = this.data.federations[fedId].visits.filter(v => v.id !== visitId); this.autoSave(); },
+
+        // Document helpers
+        handleVisitFiles(event) { const files = Array.from(event.target.files); for (const f of files) { if (f.size > 5*1024*1024) { alert(f.name + ' is over 5MB and may cause storage issues. Consider a smaller file.'); } this.pendingFiles.push(f); } event.target.value = ''; },
+        readFilesAsBase64(files) { return Promise.all(files.map(f => new Promise((resolve) => { const reader = new FileReader(); reader.onload = () => resolve({ id: genId('doc'), name: f.name, type: f.type, size: f.size, data: reader.result, addedAt: new Date().toISOString() }); reader.readAsDataURL(f); }))); },
+        formatFileSize(bytes) { if (bytes < 1024) return bytes + ' B'; if (bytes < 1024*1024) return (bytes/1024).toFixed(1) + ' KB'; return (bytes/(1024*1024)).toFixed(1) + ' MB'; },
+        downloadDocument(doc) { const a = document.createElement('a'); a.href = doc.data; a.download = doc.name; a.click(); },
+        removeDocument(fedId, visitId, docId) { if (!confirm('Remove this document?')) return; const fed = this.data.federations[fedId]; const visit = fed.visits.find(v => v.id === visitId); if (visit && visit.documents) { visit.documents = visit.documents.filter(d => d.id !== docId); this.autoSave(); } },
+        async attachToVisit(fedId, visitId) { const input = document.createElement('input'); input.type = 'file'; input.accept = '.pdf,.doc,.docx'; input.multiple = true; input.onchange = async (e) => { const files = Array.from(e.target.files); if (!files.length) return; const docs = await this.readFilesAsBase64(files); const fed = this.data.federations[fedId]; const visit = fed.visits.find(v => v.id === visitId); if (visit) { if (!visit.documents) visit.documents = []; visit.documents.push(...docs); this.autoSave(); } }; input.click(); },
 
         addAllocation() { if (!this.newAlloc.program.trim()) return alert('Please enter a program name'); const fed = this.data.federations[this.currentFedId]; if (!fed) return; fed.allocations.push({ id: genId(this.currentFedId+'-a'), program: this.newAlloc.program.trim(), amount_24_25: parseAmt(this.newAlloc.amount_24_25), amount_25_26: parseAmt(this.newAlloc.amount_25_26), amount_26_27: parseAmt(this.newAlloc.amount_26_27), notes:'' }); this.newAlloc = { program:'', amount_24_25:'', amount_25_26:'', amount_26_27:'' }; this.showAddAllocModal = false; this.autoSave(); },
         removeAllocation(fedId, allocId) { if (!confirm('Remove this allocation?')) return; this.data.federations[fedId].allocations = this.data.federations[fedId].allocations.filter(a => a.id !== allocId); this.autoSave(); },
@@ -982,7 +1023,7 @@ document.addEventListener('alpine:init', () => {
                 if (fed.websiteInfo) { rows.push(['=== WEBSITE INFO ===']); rows.push(['Website', fed.websiteInfo.website||'']); rows.push(['Address', fed.websiteInfo.address||'']); rows.push(['Phone', fed.websiteInfo.phone||'']); rows.push(['Email', fed.websiteInfo.email||'']); rows.push(['Mission', fed.websiteInfo.mission||'']); rows.push(['Charity Rating', fed.websiteInfo.charityRating||'']); rows.push(['Focus Areas', (fed.websiteInfo.focusAreas||[]).join('; ')]); rows.push(['Programs', (fed.websiteInfo.programs||[]).join('; ')]); rows.push(['Giving Options', (fed.websiteInfo.givingOptions||[]).join('; ')]); rows.push([]); }
                 rows.push(['=== KEY PEOPLE ===']); rows.push(['Name','Role','Category','Email','Phone']); fed.people.forEach(p => rows.push([p.name, p.role, p.category, p.email, p.phone])); rows.push([]);
                 rows.push(['=== ALLOCATIONS ===']); rows.push(['Program','2024-25','2025-26','2026-27','Notes']); fed.allocations.forEach(a => rows.push([a.program, a.amount_24_25||'', a.amount_25_26||'', a.amount_26_27||'', a.notes||''])); rows.push([]);
-                rows.push(['=== VISITS ===']); rows.push(['Date','Description','Notes']); fed.visits.forEach(v => rows.push([v.date, v.description, v.notes])); rows.push([]);
+                rows.push(['=== VISITS ===']); rows.push(['Date','Description','Notes','Documents']); fed.visits.forEach(v => rows.push([v.date, v.description, v.notes, (v.documents||[]).map(d=>d.name).join('; ')])); rows.push([]);
                 if (fed.communityEvents && fed.communityEvents.length > 0) { rows.push(['=== COMMUNITY EVENTS ===']); rows.push(['Name','Date','Time','Location','Cost','Category','Description']); fed.communityEvents.forEach(e => rows.push([e.name, e.date, e.time, e.location, e.cost, e.category, e.description])); rows.push([]); }
                 rows.push(['=== SHLICHUT ===']); fed.shlichut.forEach(s => rows.push([s])); rows.push([]);
                 rows.push(['=== JAFI PROGRAMS ===']); fed.jafiPrograms.forEach(p => rows.push([p])); rows.push([]);
