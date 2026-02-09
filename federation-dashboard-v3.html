@@ -35,6 +35,7 @@
         @keyframes fadeGreen { 0% { background-color: #d1fae5; } 100% { background-color: transparent; } }
         @media print { .no-print { display: none !important; } .print-break { page-break-before: always; } }
     </style>
+    <script>window.onerror = function(msg, src, line, col, err) { console.error('JS Error:', msg, 'at line', line); };</script>
 </head>
 <body class="bg-gradient-to-br from-brand-600 to-brand-500 min-h-screen">
 
@@ -936,11 +937,13 @@ document.addEventListener('alpine:init', () => {
         _saveTimer: null,
 
         init() {
-            const saved = store.load();
-            if (saved && saved.federations) { this.data = saved; ensureNewFields(this.data); }
-            else { this.data = migrateRawData(RAW_DATA); mergeLegacyStorage(this.data); store.save(this.data); }
-            const firstId = this.allFederations[0]?.id;
-            if (firstId) this.expanded[firstId] = true;
+            try {
+                const saved = store.load();
+                if (saved && saved.federations) { this.data = saved; ensureNewFields(this.data); store.save(this.data); }
+                else { this.data = migrateRawData(RAW_DATA); mergeLegacyStorage(this.data); store.save(this.data); }
+                const firstId = this.allFederations[0]?.id;
+                if (firstId) this.expanded[firstId] = true;
+            } catch(e) { console.error('Init error:', e); alert('Dashboard init error: ' + e.message + '. Try clicking Reset to fix.'); this.data = migrateRawData(RAW_DATA); store.save(this.data); }
         },
 
         get allFederations() { return this.data ? Object.values(this.data.federations) : []; },
