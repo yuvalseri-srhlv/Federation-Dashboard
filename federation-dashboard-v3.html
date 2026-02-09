@@ -59,7 +59,7 @@
     </header>
 
     <!-- STATS -->
-    <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4 mb-6">
+    <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4 mb-6">
         <div class="bg-white rounded-xl shadow p-4 text-center">
             <div class="text-3xl font-bold text-brand-500" x-text="stats.totalFederations"></div>
             <div class="text-xs text-gray-500 uppercase tracking-wider mt-1">Federations</div>
@@ -88,13 +88,17 @@
             <div class="text-3xl font-bold text-purple-600" x-text="stats.totalEvents"></div>
             <div class="text-xs text-gray-500 uppercase tracking-wider mt-1">Events</div>
         </div>
+        <div class="bg-white rounded-xl shadow p-4 text-center">
+            <div class="text-3xl font-bold text-amber-500" x-text="stats.totalOpenTasks"></div>
+            <div class="text-xs text-gray-500 uppercase tracking-wider mt-1">Open Tasks</div>
+        </div>
     </div>
 
     <!-- SEARCH + FILTER -->
     <div class="bg-white rounded-2xl shadow p-4 md:p-6 mb-6 no-print">
         <div class="flex flex-col md:flex-row items-stretch md:items-center gap-4">
             <div class="flex-1 flex gap-2">
-                <input x-model="searchTerm" type="text" placeholder="Search federations, people, allocations, visits, events, programs..."
+                <input x-model="searchTerm" type="text" placeholder="Search federations, people, tasks, allocations, visits, events, programs..."
                        style="color: #111 !important; font-size: 16px;"
                        class="flex-1 border-2 border-gray-200 rounded-lg px-4 py-3 focus:outline-none focus:border-brand-500 transition">
                 <button x-show="searchTerm.length > 0" @click="searchTerm=''" style="color: #ef4444; font-size: 20px; min-width: 40px;" class="bg-gray-100 hover:bg-gray-200 rounded-lg px-2 font-bold transition" title="Clear search">&times;</button>
@@ -139,6 +143,43 @@
             <!-- Card Body -->
             <div x-show="expanded[fed.id]" x-collapse class="border-t border-gray-100">
                 <div class="p-5 md:p-6 space-y-6">
+
+                    <!-- ONGOING TASKS -->
+                    <section>
+                        <h3 @click="toggleSection(fed.id,'tasks')" class="flex items-center justify-between text-lg font-semibold text-amber-600 cursor-pointer mb-3">
+                            <div class="flex items-center gap-2">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+                                <span>Ongoing Tasks (<span x-text="(fed.tasks||[]).filter(t=>!t.done).length"></span>)</span>
+                                <svg :class="sections[fed.id+'-tasks'] ? 'rotate-180' : ''" class="w-4 h-4 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                            </div>
+                        </h3>
+                        <div x-show="sections[fed.id+'-tasks'] !== false" class="space-y-3">
+                            <!-- Add task inline -->
+                            <div class="flex gap-2">
+                                <input type="text" x-model="newTaskText" @keydown.enter="addTask(fed.id)" placeholder="Add a new task..." class="flex-1 px-3 py-2 border border-amber-200 rounded-lg text-sm focus:ring-2 focus:ring-amber-400 focus:border-amber-400 outline-none" style="color: #111;">
+                                <button @click="addTask(fed.id)" class="bg-amber-500 hover:bg-amber-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-1">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                                    Add
+                                </button>
+                            </div>
+                            <!-- Task list -->
+                            <template x-if="(fed.tasks||[]).length === 0">
+                                <p class="text-sm text-gray-400 italic">No tasks yet. Add one above.</p>
+                            </template>
+                            <div class="space-y-1">
+                                <template x-for="task in (fed.tasks||[])" :key="task.id">
+                                    <div class="flex items-center gap-3 bg-amber-50 rounded-lg px-3 py-2 group hover:bg-amber-100 transition">
+                                        <input type="checkbox" :checked="task.done" @change="toggleTask(fed.id, task.id)" class="w-4 h-4 text-amber-500 border-amber-300 rounded focus:ring-amber-400 cursor-pointer">
+                                        <span class="flex-1 text-sm" :class="task.done ? 'line-through text-gray-400' : 'text-gray-800'" x-text="task.text"></span>
+                                        <span class="text-xs text-gray-400" x-text="task.createdAt ? new Date(task.createdAt).toLocaleDateString() : ''"></span>
+                                        <button @click="removeTask(fed.id, task.id)" class="opacity-0 group-hover:opacity-100 text-red-400 hover:text-red-600 transition" title="Remove task">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                        </button>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+                    </section>
 
                     <!-- COMMUNITY INFO -->
                     <section>
@@ -927,7 +968,7 @@ function migrateRawData(raw) {
     const result = { _version: 2, _lastModified: new Date().toISOString(), federations: {} };
     for (const [rawName, rows] of Object.entries(raw)) {
         const m = meta[rawName]; if (!m) continue;
-        const fed = { id: m.id, name: m.name, region: 'NE', community: { population: null, annualBudget: null, controls: null, details: null, summerCamps: null }, people: [], allocations: [], shlichut: [], jafiPrograms: [], opportunities: [], visits: [], notes: '', websiteInfo: { website:'', address:'', phone:'', email:'', mission:'', focusAreas:[], programs:[], charityRating:'', givingOptions:[] }, communityEvents: [] };
+        const fed = { id: m.id, name: m.name, region: 'NE', community: { population: null, annualBudget: null, controls: null, details: null, summerCamps: null }, people: [], allocations: [], shlichut: [], jafiPrograms: [], opportunities: [], visits: [], tasks: [], notes: '', websiteInfo: { website:'', address:'', phone:'', email:'', mission:'', focusAreas:[], programs:[], charityRating:'', givingOptions:[] }, communityEvents: [] };
         let currentCat = 'Federation', pIdx = 0, aIdx = 0, vIdx = 0;
         const detailParts = [];
         for (const row of rows) {
@@ -985,6 +1026,8 @@ function ensureNewFields(data) {
                 }
             }
         }
+        // Ensure tasks array exists
+        if (!fed.tasks) fed.tasks = [];
         // Ensure all visits have a documents array
         if (fed.visits) { for (const v of fed.visits) { if (!v.documents) v.documents = []; } }
         // Apply name corrections, title corrections, and contact info to people
@@ -1015,6 +1058,7 @@ document.addEventListener('alpine:init', () => {
         newAlloc: { program:'', amount_24_25:'', amount_25_26:'', amount_26_27:'' },
         newFed: { name:'', region:'NE' },
         newEvent: { name:'', date:'', time:'', location:'', cost:'', description:'', category:'Other' },
+        newTaskText: '',
         _saveTimer: null,
 
         init() {
@@ -1042,7 +1086,8 @@ document.addEventListener('alpine:init', () => {
                 totalAlloc25: feds.reduce((s,f) => s+f.allocations.reduce((a,x) => a+(x.amount_25_26||0), 0), 0),
                 totalAlloc26: feds.reduce((s,f) => s+f.allocations.reduce((a,x) => a+(x.amount_26_27||0), 0), 0),
                 totalVisits: feds.reduce((s,f) => s+f.visits.length, 0),
-                totalEvents: feds.reduce((s,f) => s+(f.communityEvents?f.communityEvents.length:0), 0)
+                totalEvents: feds.reduce((s,f) => s+(f.communityEvents?f.communityEvents.length:0), 0),
+                totalOpenTasks: feds.reduce((s,f) => s+(f.tasks?f.tasks.filter(t=>!t.done).length:0), 0)
             };
         },
 
@@ -1065,6 +1110,7 @@ document.addEventListener('alpine:init', () => {
             if (fed.websiteInfo && fed.websiteInfo.mission && fed.websiteInfo.mission.toLowerCase().includes(term)) return true;
             if (fed.websiteInfo && fed.websiteInfo.programs && fed.websiteInfo.programs.some(p => p.toLowerCase().includes(term))) return true;
             if (fed.communityEvents && fed.communityEvents.some(e => (e.name+' '+e.description+' '+e.date).toLowerCase().includes(term))) return true;
+            if (fed.tasks && fed.tasks.some(t => t.text.toLowerCase().includes(term))) return true;
             return false;
         },
 
@@ -1096,14 +1142,20 @@ document.addEventListener('alpine:init', () => {
         addEvent() { if (!this.newEvent.name.trim()) return alert('Please enter an event name'); const fed = this.data.federations[this.currentFedId]; if (!fed) return; if (!fed.communityEvents) fed.communityEvents = []; fed.communityEvents.push({ id: genId(this.currentFedId+'-e'), name: this.newEvent.name.trim(), date: this.newEvent.date.trim(), time: this.newEvent.time.trim(), location: this.newEvent.location.trim(), cost: this.newEvent.cost.trim(), description: this.newEvent.description.trim(), category: this.newEvent.category }); this.newEvent = { name:'', date:'', time:'', location:'', cost:'', description:'', category:'Other' }; this.showAddEventModal = false; this.autoSave(); },
         removeEvent(fedId, eventId) { if (!confirm('Remove this event?')) return; const fed = this.data.federations[fedId]; fed.communityEvents = fed.communityEvents.filter(e => e.id !== eventId); this.autoSave(); },
 
-        addFederation() { if (!this.newFed.name.trim()) return alert('Please enter a name'); const id = this.newFed.name.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/-+$/,''); if (this.data.federations[id]) return alert('A federation with a similar name already exists'); this.data.federations[id] = { id, name: this.newFed.name.trim(), region: this.newFed.region||'NE', community: { population:null, annualBudget:null, controls:null, details:null, summerCamps:null }, people:[], allocations:[], shlichut:[], jafiPrograms:[], opportunities:[], visits:[], notes:'', websiteInfo: { website:'', address:'', phone:'', email:'', mission:'', focusAreas:[], programs:[], charityRating:'', givingOptions:[] }, communityEvents:[] }; this.expanded[id] = true; this.newFed = { name:'', region:'NE' }; this.showAddFedModal = false; this.autoSave(); },
+        // Task methods
+        addTask(fedId) { const text = this.newTaskText.trim(); if (!text) return; const fed = this.data.federations[fedId]; if (!fed) return; if (!fed.tasks) fed.tasks = []; fed.tasks.push({ id: genId(fedId+'-t'), text: text, done: false, createdAt: new Date().toISOString() }); this.newTaskText = ''; this.autoSave(); },
+        toggleTask(fedId, taskId) { const fed = this.data.federations[fedId]; if (!fed || !fed.tasks) return; const task = fed.tasks.find(t => t.id === taskId); if (task) { task.done = !task.done; this.autoSave(); } },
+        removeTask(fedId, taskId) { if (!confirm('Remove this task?')) return; const fed = this.data.federations[fedId]; if (!fed) return; fed.tasks = fed.tasks.filter(t => t.id !== taskId); this.autoSave(); },
+
+        addFederation() { if (!this.newFed.name.trim()) return alert('Please enter a name'); const id = this.newFed.name.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/-+$/,''); if (this.data.federations[id]) return alert('A federation with a similar name already exists'); this.data.federations[id] = { id, name: this.newFed.name.trim(), region: this.newFed.region||'NE', community: { population:null, annualBudget:null, controls:null, details:null, summerCamps:null }, people:[], allocations:[], shlichut:[], jafiPrograms:[], opportunities:[], visits:[], tasks:[], notes:'', websiteInfo: { website:'', address:'', phone:'', email:'', mission:'', focusAreas:[], programs:[], charityRating:'', givingOptions:[] }, communityEvents:[] }; this.expanded[id] = true; this.newFed = { name:'', region:'NE' }; this.showAddFedModal = false; this.autoSave(); },
 
         exportToExcel() {
             const wb = XLSX.utils.book_new();
-            const summaryRows = [['NE Regional Director - Federation Dashboard'],['Export Date: '+new Date().toLocaleDateString()],[],['Federation','People','Alloc 24-25','Alloc 25-26','Alloc 26-27','Visits','Events']];
+            const summaryRows = [['NE Regional Director - Federation Dashboard'],['Export Date: '+new Date().toLocaleDateString()],[],['Federation','People','Open Tasks','Alloc 24-25','Alloc 25-26','Alloc 26-27','Visits','Events']];
             for (const fed of this.allFederations) {
-                summaryRows.push([fed.name, fed.people.length, fmtCur(this.sumAlloc(fed,'24_25')), fmtCur(this.sumAlloc(fed,'25_26')), fmtCur(this.sumAlloc(fed,'26_27')), fed.visits.length, (fed.communityEvents||[]).length]);
+                summaryRows.push([fed.name, fed.people.length, (fed.tasks||[]).filter(t=>!t.done).length, fmtCur(this.sumAlloc(fed,'24_25')), fmtCur(this.sumAlloc(fed,'25_26')), fmtCur(this.sumAlloc(fed,'26_27')), fed.visits.length, (fed.communityEvents||[]).length]);
                 const rows = [];
+                rows.push(['=== ONGOING TASKS ===']); rows.push(['Task','Status','Created']); if (fed.tasks && fed.tasks.length > 0) { fed.tasks.forEach(t => rows.push([t.text, t.done ? 'Completed' : 'Open', t.createdAt ? new Date(t.createdAt).toLocaleDateString() : ''])); } rows.push([]);
                 rows.push(['=== COMMUNITY INFO ===']); rows.push(['Population', fed.community.population||'']); rows.push(['Annual Budget', fed.community.annualBudget||'']); rows.push(['Controls', fed.community.controls||'']); rows.push(['Details', fed.community.details||'']); rows.push(['Summer Camps', fed.community.summerCamps||'']); rows.push([]);
                 if (fed.websiteInfo) { rows.push(['=== WEBSITE INFO ===']); rows.push(['Website', fed.websiteInfo.website||'']); rows.push(['Address', fed.websiteInfo.address||'']); rows.push(['Phone', fed.websiteInfo.phone||'']); rows.push(['Email', fed.websiteInfo.email||'']); rows.push(['Mission', fed.websiteInfo.mission||'']); rows.push(['Charity Rating', fed.websiteInfo.charityRating||'']); rows.push(['Focus Areas', (fed.websiteInfo.focusAreas||[]).join('; ')]); rows.push(['Programs', (fed.websiteInfo.programs||[]).join('; ')]); rows.push(['Giving Options', (fed.websiteInfo.givingOptions||[]).join('; ')]); rows.push([]); }
                 rows.push(['=== KEY PEOPLE ===']); rows.push(['Name','Role','Category','Email','Phone']); fed.people.forEach(p => rows.push([p.name, p.role, p.category, p.email, p.phone])); rows.push([]);
