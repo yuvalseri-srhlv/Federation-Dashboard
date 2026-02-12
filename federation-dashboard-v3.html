@@ -622,7 +622,9 @@
                                         <tr class="border-b border-gray-100 hover:bg-gray-50">
                                             <td class="p-3" x-text="alloc.program + (alloc.notes ? ' (' + alloc.notes + ')' : '')"></td>
                                             <td class="p-3 text-right text-green-600 font-semibold" x-text="fmtCur(alloc.amount_24_25)"></td>
-                                            <td class="p-3 text-right text-green-600 font-semibold" x-text="fmtCur(alloc.amount_25_26)"></td>
+                                            <td class="p-3 text-right">
+                                                <input type="text" :value="alloc.amount_25_26 ? fmtCur(alloc.amount_25_26) : ''" @blur="alloc.amount_25_26=parseAmt($event.target.value); autoSave()" placeholder="$0" class="w-24 text-right border border-gray-200 rounded px-2 py-1 focus:outline-none focus:border-brand-500 text-green-600 font-semibold">
+                                            </td>
                                             <td class="p-3 text-right">
                                                 <input type="text" :value="alloc.amount_26_27 ? fmtCur(alloc.amount_26_27) : ''" @blur="alloc.amount_26_27=parseAmt($event.target.value); autoSave()" placeholder="$0" class="w-24 text-right border border-gray-200 rounded px-2 py-1 focus:outline-none focus:border-brand-500">
                                             </td>
