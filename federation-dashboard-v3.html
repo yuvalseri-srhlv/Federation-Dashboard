@@ -561,15 +561,32 @@
                         </div>
                         <div x-show="sections[fed.id+'-people'] !== false">
                             <template x-for="cat in getCategories(fed)" :key="cat">
-                                <div class="mb-4">
+                                <div class="mb-4" @dragover.prevent="$event.dataTransfer.dropEffect='move'" @drop="onDropCategory($event, cat, fed.id)">
                                     <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2" x-text="cat"></h4>
                                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                                         <template x-for="person in fed.people.filter(p => p.category === cat)" :key="person.id">
-                                            <div class="border-2 border-gray-200 rounded-lg p-3 hover:border-brand-400 transition relative group">
-                                                <div class="font-semibold text-brand-600" x-text="person.name"></div>
-                                                <div class="text-gray-500 text-sm" x-text="person.role || 'No role'"></div>
-                                                <template x-if="person.email"><div class="text-xs text-gray-400 mt-1" x-text="person.email"></div></template>
-                                                <template x-if="person.phone"><div class="text-xs text-gray-400" x-text="person.phone"></div></template>
+                                            <div class="border-2 border-gray-200 rounded-lg p-3 hover:border-brand-400 transition relative group cursor-grab active:cursor-grabbing"
+                                                 draggable="true"
+                                                 @dragstart="onDragStartPerson($event, person, fed.id)"
+                                                 @dragend="onDragEndPerson($event)"
+                                                 @dragover="onDragOverPerson($event)"
+                                                 @drop.stop="onDropPerson($event, person, fed.id)">
+                                                <div class="flex items-start gap-2">
+                                                    <div class="flex flex-col gap-0.5 opacity-0 group-hover:opacity-100 transition no-print mt-1 shrink-0" title="Drag to reorder, or use arrows">
+                                                        <button @click="movePersonUp(fed.id, person.id)" class="text-gray-400 hover:text-brand-600 leading-none">
+                                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/></svg>
+                                                        </button>
+                                                        <button @click="movePersonDown(fed.id, person.id)" class="text-gray-400 hover:text-brand-600 leading-none">
+                                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                                                        </button>
+                                                    </div>
+                                                    <div class="flex-1 min-w-0">
+                                                        <div class="font-semibold text-brand-600" x-text="person.name"></div>
+                                                        <div class="text-gray-500 text-sm" x-text="person.role || 'No role'"></div>
+                                                        <template x-if="person.email"><div class="text-xs text-gray-400 mt-1" x-text="person.email"></div></template>
+                                                        <template x-if="person.phone"><div class="text-xs text-gray-400" x-text="person.phone"></div></template>
+                                                    </div>
+                                                </div>
                                                 <div class="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition no-print">
                                                     <button @click="editingPerson=JSON.parse(JSON.stringify(person)); currentFedId=fed.id; showEditPersonModal=true" class="text-brand-400 hover:text-brand-600 text-xs bg-brand-50 rounded px-1.5 py-0.5">Edit</button>
                                                     <button @click="removePerson(fed.id, person.id)" class="text-red-400 hover:text-red-600 text-xs bg-red-50 rounded px-1.5 py-0.5">X</button>
@@ -1222,6 +1239,7 @@ document.addEventListener('alpine:init', () => {
         newEvent: { name:'', date:'', time:'', location:'', cost:'', description:'', category:'Other' },
         newTaskText: '',
         newGeneralTaskText: { galNA: '', adi: '', general: '' },
+        dragPerson: null, dragFedId: null,
         generalTasksOpen: true,
         _saveTimer: null,
 
@@ -1288,6 +1306,72 @@ document.addEventListener('alpine:init', () => {
         addPerson() { if (!this.newPerson.name.trim()) return alert('Please enter a name'); const fed = this.data.federations[this.currentFedId]; if (!fed) return; fed.people.push({ id: genId(this.currentFedId+'-p'), name: this.newPerson.name.trim(), role: this.newPerson.role.trim(), category: this.newPerson.category, email: this.newPerson.email.trim(), phone: this.newPerson.phone.trim(), notes:'' }); this.newPerson = { name:'', role:'', category:'Federation', email:'', phone:'' }; this.showAddPersonModal = false; this.autoSave(); },
         saveEditPerson() { const fed = this.data.federations[this.currentFedId]; if (!fed) return; const idx = fed.people.findIndex(p => p.id === this.editingPerson.id); if (idx === -1) return; fed.people[idx] = { ...this.editingPerson }; this.showEditPersonModal = false; this.autoSave(); },
         removePerson(fedId, personId) { if (!confirm('Remove this person?')) return; this.data.federations[fedId].people = this.data.federations[fedId].people.filter(p => p.id !== personId); this.autoSave(); },
+
+        // Drag and drop for people reordering
+        onDragStartPerson(event, person, fedId) { this.dragPerson = person; this.dragFedId = fedId; event.dataTransfer.effectAllowed = 'move'; event.dataTransfer.setData('text/plain', person.id); event.target.style.opacity = '0.4'; },
+        onDragEndPerson(event) { event.target.style.opacity = '1'; this.dragPerson = null; this.dragFedId = null; },
+        onDragOverPerson(event) { event.preventDefault(); event.dataTransfer.dropEffect = 'move'; },
+        onDropPerson(event, targetPerson, fedId) {
+            event.preventDefault();
+            if (!this.dragPerson || this.dragFedId !== fedId || this.dragPerson.id === targetPerson.id) return;
+            const fed = this.data.federations[fedId];
+            const fromIdx = fed.people.findIndex(p => p.id === this.dragPerson.id);
+            const toIdx = fed.people.findIndex(p => p.id === targetPerson.id);
+            if (fromIdx === -1 || toIdx === -1) return;
+            // Change category if dropping into different category
+            if (this.dragPerson.category !== targetPerson.category) {
+                fed.people[fromIdx].category = targetPerson.category;
+            }
+            // Reorder: remove from old position, insert at new
+            const [moved] = fed.people.splice(fromIdx, 1);
+            const newToIdx = fed.people.findIndex(p => p.id === targetPerson.id);
+            fed.people.splice(newToIdx, 0, moved);
+            this.autoSave();
+        },
+        onDropCategory(event, category, fedId) {
+            event.preventDefault();
+            if (!this.dragPerson || this.dragFedId !== fedId) return;
+            const fed = this.data.federations[fedId];
+            const fromIdx = fed.people.findIndex(p => p.id === this.dragPerson.id);
+            if (fromIdx === -1) return;
+            // Move to end of target category
+            fed.people[fromIdx].category = category;
+            const [moved] = fed.people.splice(fromIdx, 1);
+            // Find last person in target category and insert after
+            let insertIdx = fed.people.length;
+            for (let i = fed.people.length - 1; i >= 0; i--) {
+                if (fed.people[i].category === category) { insertIdx = i + 1; break; }
+            }
+            fed.people.splice(insertIdx, 0, moved);
+            this.autoSave();
+        },
+        movePersonUp(fedId, personId) {
+            const fed = this.data.federations[fedId];
+            const idx = fed.people.findIndex(p => p.id === personId);
+            if (idx <= 0) return;
+            // Swap with previous person in same category
+            const person = fed.people[idx];
+            const sameCat = fed.people.filter(p => p.category === person.category);
+            const catIdx = sameCat.findIndex(p => p.id === personId);
+            if (catIdx <= 0) return;
+            const prevPerson = sameCat[catIdx - 1];
+            const prevIdx = fed.people.findIndex(p => p.id === prevPerson.id);
+            [fed.people[idx], fed.people[prevIdx]] = [fed.people[prevIdx], fed.people[idx]];
+            this.autoSave();
+        },
+        movePersonDown(fedId, personId) {
+            const fed = this.data.federations[fedId];
+            const idx = fed.people.findIndex(p => p.id === personId);
+            if (idx === -1) return;
+            const person = fed.people[idx];
+            const sameCat = fed.people.filter(p => p.category === person.category);
+            const catIdx = sameCat.findIndex(p => p.id === personId);
+            if (catIdx >= sameCat.length - 1) return;
+            const nextPerson = sameCat[catIdx + 1];
+            const nextIdx = fed.people.findIndex(p => p.id === nextPerson.id);
+            [fed.people[idx], fed.people[nextIdx]] = [fed.people[nextIdx], fed.people[idx]];
+            this.autoSave();
+        },
 
         async addVisit() { if (!this.newVisit.date.trim()) return alert('Please enter a date'); const fed = this.data.federations[this.currentFedId]; if (!fed) return; const docs = await this.readFilesAsBase64(this.pendingFiles); fed.visits.push({ id: genId(this.currentFedId+'-v'), date: this.newVisit.date.trim(), description: this.newVisit.description.trim(), notes: this.newVisit.notes.trim(), documents: docs }); this.newVisit = { date:'', description:'', notes:'' }; this.pendingFiles = []; this.showAddVisitModal = false; this.autoSave(); },
         removeVisit(fedId, visitId) { if (!confirm('Remove this visit?')) return; this.data.federations[fedId].visits = this.data.federations[fedId].visits.filter(v => v.id !== visitId); this.autoSave(); },
