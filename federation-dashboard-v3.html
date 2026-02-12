@@ -744,6 +744,8 @@ const RAW_DATA = {
     [null, null, null, null, null, "David Speer", "Maryland/Israel Development Center's  Executive Director", null, null, null, null, null, null, null],
     [null, null, null, null, null, "Debbie Dubin", "Senior Director of Major Gifts", "Emergency campaign", "$5,000,000", null, null, null, null, null],
     [null, null, null, null, null, "Ami Nahshoni", "Director, Israel and overseas", null, null, null, null, null, null, null],
+    [null, null, null, null, null, "Michelle Gordon", "Executive Vice President and Acting Chief Development Officer"],
+    [null, null, null, null, null, "Howard Libit", "Executive Director, Baltimore Jewish Council (BJC/JCRC)"],
     [null, null, null, null, "Israel Office", "Ittai Korinmann Weiss", "Managing director Israel office", null, null, null, null, null, null, null],
     [null, null, null, null, "BOG - Jafi", "Linda Hurwitz", "BOG", null, null, null, null, null, null, null],
     [null, null, null, null, null, "Bruce Shulk", "chairman of budget and finance BOG Jafi", null, null, null, null, null, null, null],
@@ -808,7 +810,10 @@ const RAW_DATA = {
     [null, null, null, null, "Community", "David Rosenberg", "Executive Director, New Jersey Jewish Business Alliance"]
   ],
   "CJP": [
-    ["Haifa-Boston Loan fund", "P2P", "Community", "250,000 approx. 30,000 Israelis", null, "Noam Bentov", "Associate Vice President, Israel and Global Jewry", "Core ", "$275,000", "$375,000", "26-27: 2 Shinshinim (Shirat Hayam Cong, North shore), 1 Ofek (Rashi School, Beth Shalom)", null, "Dec 10th 24", "Introduction meeting (first time in person), including I&O and CEO, Marc Baker"],
+    ["Haifa-Boston Loan fund", "P2P", "Community", "250,000 approx. 30,000 Israelis", "Federation", "Marc Baker", "President and CEO", "Core ", "$275,000", "$375,000", "26-27: 2 Shinshinim (Shirat Hayam Cong, North shore), 1 Ofek (Rashi School, Beth Shalom)", null, "Dec 10th 24", "Introduction meeting (first time in person), including I&O and CEO, Marc Baker"],
+    [null, null, null, null, null, "Jennifer Weinstock", "Executive Vice President, Philanthropy"],
+    [null, null, null, null, null, "Jeremy Burton", "CEO, Jewish Community Relations Council (JCRC) of Greater Boston"],
+    [null, null, null, null, null, "Noam Bentov", "Associate Vice President, Israel and Global Jewry"],
     ["Israel Office (Lior Krengel) - $4M for rebuilding Israel", "Increase the number of people going on journies to Israel", "Annual Budget ", "$58-60M approx", null, "Ariel Libhaber", "Senior Director, Global Partnerships ", "Boston-haifa Loan Fund", null, "$100,000", null, null, "Feb 3rd 25", "Prizma conference; Fed meetings"],
     [null, null, "Controls", "CCA - Center for Combating Antisemitism", null, "Debbie Katz", "Principal Gifts Officer"],
     [null, null, null, null, null, "Sara sousy", "schedule incharge for Marc Baker", null, null, null, null, null, "Dec 15-16th 2025", "Communities visits; Shlichim Conference; Fed meetings"],
@@ -824,6 +829,8 @@ const RAW_DATA = {
     [null, null, null, null, null, "Efrat Petel", "Director, Israel & Global Jewry", null, null, null, null, null, "Dec 17-18th 25", "visit with Gal - Fed meetings; Communities visits; shlichim visit"],
     [null, null, null, null, null, "Jeanine Monachino", "Chief Financial & Operating Officer"],
     [null, null, null, null, null, "Debbie Goldberg", "Chief Philanthropic Officer"],
+    [null, null, null, null, null, "Ted Axelrod", "Interim Chief of Staff"],
+    [null, null, null, null, null, "Monica Gebell", "Director of Jewish Community Relations & Executive Director, Levine Center to End Hate"],
     [null, null, null, null, null, "Randy Schuster", "President (2025-2026)"],
     [null, null, null, null, "Israel office", "Elinor Zur", "P2G Director"],
     [null, null, null, null, "BOG - Jafi", "Rick Goldstien", "BOG"]
@@ -932,7 +939,14 @@ const TITLE_CORRECTIONS = {
     "Leah Goldman": "Chief Planning & Program Officer",
     "Michal Spivak": "Director of ShinShinim Programming",
     "Efrat Petel": "Director, Israel & Global Jewry",
-    "Randy Schuster": "President (2025-2026)"
+    "Randy Schuster": "President (2025-2026)",
+    "Michelle Gordon": "Executive Vice President and Acting Chief Development Officer",
+    "Howard Libit": "Executive Director, Baltimore Jewish Council (BJC/JCRC)",
+    "Marc Baker": "President and CEO",
+    "Jennifer Weinstock": "Executive Vice President, Philanthropy",
+    "Jeremy Burton": "CEO, Jewish Community Relations Council (JCRC) of Greater Boston",
+    "Ted Axelrod": "Interim Chief of Staff",
+    "Monica Gebell": "Director of Jewish Community Relations & Executive Director, Levine Center to End Hate"
 };
 // Contact info: name -> { email, phone }
 const CONTACT_INFO = {
@@ -961,7 +975,31 @@ const CONTACT_INFO = {
     "Jeanine Monachino": { email: "jmonachino@jewishrochester.org", phone: "585-241-8630" },
     "Debbie Goldberg": { email: "dgoldberg@jewishrochester.org", phone: "585-241-8627" },
     "Randy Schuster": { email: "", phone: "" },
-    "Ted Axelrod": { email: "taxelrod@jewishrochester.org", phone: "585-241-8629" }
+    "Ted Axelrod": { email: "taxelrod@jewishrochester.org", phone: "585-241-8629" },
+    "Michelle Gordon": { email: "", phone: "410-727-4828" },
+    "Howard Libit": { email: "hlibit@baltjc.org", phone: "410-542-4850" },
+    "Marc Baker": { email: "", phone: "617-457-8500" },
+    "Jennifer Weinstock": { email: "", phone: "617-457-8500" },
+    "Jeremy Burton": { email: "jburton@jcrcboston.org", phone: "617-457-8600" },
+    "Monica Gebell": { email: "mgebell@jewishrochester.org", phone: "585-241-8651" },
+    "Michelle Ostroff": { email: "mostroff@associated.org", phone: "410-369-9231" }
+};
+
+// Required people per federation (injected into existing data if missing)
+const REQUIRED_PEOPLE = {
+    baltimore: [
+        { name: "Michelle Gordon", role: "Executive Vice President and Acting Chief Development Officer", category: "Federation" },
+        { name: "Howard Libit", role: "Executive Director, Baltimore Jewish Council (BJC/JCRC)", category: "Federation" }
+    ],
+    cjp: [
+        { name: "Marc Baker", role: "President and CEO", category: "Federation" },
+        { name: "Jennifer Weinstock", role: "Executive Vice President, Philanthropy", category: "Federation" },
+        { name: "Jeremy Burton", role: "CEO, Jewish Community Relations Council (JCRC) of Greater Boston", category: "Federation" }
+    ],
+    rochester: [
+        { name: "Ted Axelrod", role: "Interim Chief of Staff", category: "Federation" },
+        { name: "Monica Gebell", role: "Director of Jewish Community Relations & Executive Director, Levine Center to End Hate", category: "Federation" }
+    ]
 };
 
 // =============================================
@@ -1046,6 +1084,17 @@ function ensureNewFields(data) {
                 // Merge contact info if empty
                 const ci = CONTACT_INFO[p.name];
                 if (ci) { if (!p.email && ci.email) p.email = ci.email; if (!p.phone && ci.phone) p.phone = ci.phone; }
+            }
+        }
+        // Inject required people if missing from existing data
+        const reqPeople = REQUIRED_PEOPLE[fed.id];
+        if (reqPeople && fed.people) {
+            const existingNames = new Set(fed.people.map(p => p.name));
+            for (const rp of reqPeople) {
+                if (!existingNames.has(rp.name)) {
+                    const ci = CONTACT_INFO[rp.name] || {};
+                    fed.people.push({ id: genId(fed.id+'-p'), name: rp.name, role: rp.role, category: rp.category, email: ci.email||'', phone: ci.phone||'', notes:'' });
+                }
             }
         }
     }
