@@ -74,11 +74,11 @@
         </div>
         <div class="bg-white rounded-xl shadow p-4 text-center">
             <div class="text-2xl font-bold text-green-600" x-text="fmtCur(stats.totalAlloc25)"></div>
-            <div class="text-xs text-gray-500 uppercase tracking-wider mt-1">Alloc 25-26</div>
+            <div class="text-xs text-gray-500 uppercase tracking-wider mt-1" x-text="'Alloc ' + (data && data.allocLabels ? data.allocLabels.col2 : '25-26')"></div>
         </div>
         <div class="bg-white rounded-xl shadow p-4 text-center">
             <div class="text-2xl font-bold text-green-600" x-text="fmtCur(stats.totalAlloc26)"></div>
-            <div class="text-xs text-gray-500 uppercase tracking-wider mt-1">Alloc 26-27</div>
+            <div class="text-xs text-gray-500 uppercase tracking-wider mt-1" x-text="'Alloc ' + (data && data.allocLabels ? data.allocLabels.col3 : '26-27')"></div>
         </div>
         <div class="bg-white rounded-xl shadow p-4 text-center">
             <div class="text-3xl font-bold text-brand-500" x-text="stats.totalVisits"></div>
@@ -613,8 +613,8 @@
                                 <thead><tr class="bg-gray-50">
                                     <th class="text-left p-3 font-semibold text-brand-600">Program</th>
                                     <th class="text-right p-3 font-semibold text-brand-600">2024-25</th>
-                                    <th class="text-right p-3 font-semibold text-brand-600">2025-26</th>
-                                    <th class="text-right p-3 font-semibold text-brand-600">2026-27</th>
+                                    <th class="text-right p-3 font-semibold text-brand-600"><input type="text" x-model="data.allocLabels.col2" @blur="autoSave()" class="w-20 text-right bg-transparent border-b border-dashed border-transparent hover:border-brand-300 focus:border-brand-500 outline-none font-semibold text-brand-600"></th>
+                                    <th class="text-right p-3 font-semibold text-brand-600"><input type="text" x-model="data.allocLabels.col3" @blur="autoSave()" class="w-20 text-right bg-transparent border-b border-dashed border-transparent hover:border-brand-300 focus:border-brand-500 outline-none font-semibold text-brand-600"></th>
                                     <th class="w-10 no-print"></th>
                                 </tr></thead>
                                 <tbody>
@@ -784,8 +784,8 @@
             <div class="space-y-3">
                 <input x-model="newAlloc.program" placeholder="Program Name *" class="w-full border-2 border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:border-brand-500">
                 <input x-model="newAlloc.amount_24_25" placeholder="Amount 2024-25" class="w-full border-2 border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:border-brand-500">
-                <input x-model="newAlloc.amount_25_26" placeholder="Amount 2025-26" class="w-full border-2 border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:border-brand-500">
-                <input x-model="newAlloc.amount_26_27" placeholder="Amount 2026-27" class="w-full border-2 border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:border-brand-500">
+                <input x-model="newAlloc.amount_25_26" :placeholder="'Amount ' + (data.allocLabels ? data.allocLabels.col2 : '2025-26')" class="w-full border-2 border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:border-brand-500">
+                <input x-model="newAlloc.amount_26_27" :placeholder="'Amount ' + (data.allocLabels ? data.allocLabels.col3 : '2026-27')" class="w-full border-2 border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:border-brand-500">
             </div>
             <div class="flex gap-3 mt-5">
                 <button @click="addAllocation()" class="flex-1 bg-brand-500 hover:bg-brand-600 text-white py-2 rounded-lg font-medium transition">Add Allocation</button>
@@ -1248,11 +1248,11 @@ document.addEventListener('alpine:init', () => {
         init() {
             try {
                 const saved = store.load();
-                if (saved && saved.federations) { this.data = saved; ensureNewFields(this.data); if (!this.data.generalTasks) this.data.generalTasks = { galNA: [], adi: [], general: [] }; store.save(this.data); }
-                else { this.data = migrateRawData(RAW_DATA); this.data.generalTasks = { galNA: [], adi: [], general: [] }; mergeLegacyStorage(this.data); store.save(this.data); }
+                if (saved && saved.federations) { this.data = saved; ensureNewFields(this.data); if (!this.data.generalTasks) this.data.generalTasks = { galNA: [], adi: [], general: [] }; if (!this.data.allocLabels) this.data.allocLabels = { col2: '2025-26', col3: '2026-27' }; store.save(this.data); }
+                else { this.data = migrateRawData(RAW_DATA); this.data.generalTasks = { galNA: [], adi: [], general: [] }; this.data.allocLabels = { col2: '2025-26', col3: '2026-27' }; mergeLegacyStorage(this.data); store.save(this.data); }
                 const firstId = this.allFederations[0]?.id;
                 if (firstId) this.expanded[firstId] = true;
-            } catch(e) { console.error('Init error:', e); alert('Dashboard init error: ' + e.message + '. Try clicking Reset to fix.'); this.data = migrateRawData(RAW_DATA); this.data.generalTasks = { galNA: [], adi: [], general: [] }; store.save(this.data); }
+            } catch(e) { console.error('Init error:', e); alert('Dashboard init error: ' + e.message + '. Try clicking Reset to fix.'); this.data = migrateRawData(RAW_DATA); this.data.generalTasks = { galNA: [], adi: [], general: [] }; this.data.allocLabels = { col2: '2025-26', col3: '2026-27' }; store.save(this.data); }
         },
 
         get allFederations() { return this.data ? Object.values(this.data.federations) : []; },
@@ -1407,7 +1407,8 @@ document.addEventListener('alpine:init', () => {
 
         exportToExcel() {
             const wb = XLSX.utils.book_new();
-            const summaryRows = [['NE Regional Director - Federation Dashboard'],['Export Date: '+new Date().toLocaleDateString()],[],['Federation','People','Open Tasks','Alloc 24-25','Alloc 25-26','Alloc 26-27','Visits','Events']];
+            const al = this.data.allocLabels || { col2:'2025-26', col3:'2026-27' };
+            const summaryRows = [['NE Regional Director - Federation Dashboard'],['Export Date: '+new Date().toLocaleDateString()],[],['Federation','People','Open Tasks','Alloc 24-25','Alloc '+al.col2,'Alloc '+al.col3,'Visits','Events']];
             for (const fed of this.allFederations) {
                 summaryRows.push([fed.name, fed.people.length, (fed.tasks||[]).filter(t=>!t.done).length, fmtCur(this.sumAlloc(fed,'24_25')), fmtCur(this.sumAlloc(fed,'25_26')), fmtCur(this.sumAlloc(fed,'26_27')), fed.visits.length, (fed.communityEvents||[]).length]);
                 const rows = [];
@@ -1415,7 +1416,7 @@ document.addEventListener('alpine:init', () => {
                 rows.push(['=== COMMUNITY INFO ===']); rows.push(['Population', fed.community.population||'']); rows.push(['Annual Budget', fed.community.annualBudget||'']); rows.push(['Controls', fed.community.controls||'']); rows.push(['Partnership', fed.community.partnership||'']); rows.push(['Details', fed.community.details||'']); rows.push(['Summer Camps', fed.community.summerCamps||'']); rows.push([]);
                 if (fed.websiteInfo) { rows.push(['=== WEBSITE INFO ===']); rows.push(['Website', fed.websiteInfo.website||'']); rows.push(['Address', fed.websiteInfo.address||'']); rows.push(['Phone', fed.websiteInfo.phone||'']); rows.push(['Email', fed.websiteInfo.email||'']); rows.push(['Mission', fed.websiteInfo.mission||'']); rows.push(['Charity Rating', fed.websiteInfo.charityRating||'']); rows.push(['Focus Areas', (fed.websiteInfo.focusAreas||[]).join('; ')]); rows.push(['Programs', (fed.websiteInfo.programs||[]).join('; ')]); rows.push(['Giving Options', (fed.websiteInfo.givingOptions||[]).join('; ')]); rows.push([]); }
                 rows.push(['=== KEY PEOPLE ===']); rows.push(['Name','Role','Category','Email','Phone']); fed.people.forEach(p => rows.push([p.name, p.role, p.category, p.email, p.phone])); rows.push([]);
-                rows.push(['=== ALLOCATIONS ===']); rows.push(['Program','2024-25','2025-26','2026-27','Notes']); fed.allocations.forEach(a => rows.push([a.program, a.amount_24_25||'', a.amount_25_26||'', a.amount_26_27||'', a.notes||''])); rows.push([]);
+                rows.push(['=== ALLOCATIONS ===']); rows.push(['Program','2024-25',al.col2,al.col3,'Notes']); fed.allocations.forEach(a => rows.push([a.program, a.amount_24_25||'', a.amount_25_26||'', a.amount_26_27||'', a.notes||''])); rows.push([]);
                 rows.push(['=== VISITS ===']); rows.push(['Date','Description','Notes','Documents']); fed.visits.forEach(v => rows.push([v.date, v.description, v.notes, (v.documents||[]).map(d=>d.name).join('; ')])); rows.push([]);
                 if (fed.communityEvents && fed.communityEvents.length > 0) { rows.push(['=== COMMUNITY EVENTS ===']); rows.push(['Name','Date','Time','Location','Cost','Category','Description']); fed.communityEvents.forEach(e => rows.push([e.name, e.date, e.time, e.location, e.cost, e.category, e.description])); rows.push([]); }
                 rows.push(['=== SHLICHUT ===']); fed.shlichut.forEach(s => rows.push([s])); rows.push([]);
@@ -1432,7 +1433,7 @@ document.addEventListener('alpine:init', () => {
         },
         exportToJSON() { const blob = new Blob([JSON.stringify(this.data, null, 2)], {type:'application/json'}); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'federation-dashboard-backup-'+new Date().toISOString().split('T')[0]+'.json'; a.click(); },
         importFromJSON(event) { const file = event.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = (e) => { try { const imported = JSON.parse(e.target.result); if (!imported.federations) throw new Error('Invalid format'); if (!confirm('This will replace all current data. Continue?')) return; this.data = imported; ensureNewFields(this.data); store.save(this.data); this.showImportModal = false; this.flashSave(); } catch(err) { alert('Invalid JSON file: '+err.message); } }; reader.readAsText(file); },
-        resetData() { if (!confirm('Reset ALL data to the original dataset? This cannot be undone.')) return; if (!confirm('Are you absolutely sure? All your edits will be lost.')) return; store.clear(); this.data = migrateRawData(RAW_DATA); this.data.generalTasks = { galNA: [], adi: [], general: [] }; store.save(this.data); this.flashSave(); }
+        resetData() { if (!confirm('Reset ALL data to the original dataset? This cannot be undone.')) return; if (!confirm('Are you absolutely sure? All your edits will be lost.')) return; store.clear(); this.data = migrateRawData(RAW_DATA); this.data.generalTasks = { galNA: [], adi: [], general: [] }; this.data.allocLabels = { col2: '2025-26', col3: '2026-27' }; store.save(this.data); this.flashSave(); }
     }));
 });
 </script>
