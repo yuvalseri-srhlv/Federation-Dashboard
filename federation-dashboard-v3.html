@@ -502,6 +502,48 @@
                         </div>
                     </section>
 
+                    <!-- MISSIONS -->
+                    <section>
+                        <div class="flex items-center justify-between mb-3">
+                            <h3 @click="toggleSection(fed.id,'missions')" class="flex items-center gap-2 text-lg font-semibold text-sky-700 cursor-pointer">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                <span x-text="'Missions (' + (fed.missions||[]).length + ')'"></span>
+                                <svg :class="sections[fed.id+'-missions'] ? 'rotate-180' : ''" class="w-4 h-4 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                            </h3>
+                            <button @click="currentFedId=fed.id; showAddMissionModal=true" class="text-sm bg-sky-600 hover:bg-sky-700 text-white px-3 py-1.5 rounded-lg transition no-print">+ Add Mission</button>
+                        </div>
+                        <div x-show="sections[fed.id+'-missions'] !== false" class="space-y-3">
+                            <template x-for="mission in (fed.missions||[])" :key="mission.id">
+                                <div class="bg-sky-50 border-l-4 border-sky-500 rounded-r-lg p-4 group relative">
+                                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                        <div>
+                                            <label class="text-xs font-semibold text-sky-600 uppercase">Dates</label>
+                                            <input x-model="mission.dates" @input="autoSave()" class="mt-0.5 w-full bg-transparent border-b border-dashed border-sky-300 focus:border-sky-500 outline-none py-1 text-sm" style="color: #111;" placeholder="e.g. Mar 15-22, 2026">
+                                        </div>
+                                        <div>
+                                            <label class="text-xs font-semibold text-sky-600 uppercase">Destination</label>
+                                            <input x-model="mission.destination" @input="autoSave()" class="mt-0.5 w-full bg-transparent border-b border-dashed border-sky-300 focus:border-sky-500 outline-none py-1 text-sm" style="color: #111;" placeholder="e.g. Israel">
+                                        </div>
+                                        <div>
+                                            <label class="text-xs font-semibold text-sky-600 uppercase">Type of Delegation</label>
+                                            <input x-model="mission.delegationType" @input="autoSave()" class="mt-0.5 w-full bg-transparent border-b border-dashed border-sky-300 focus:border-sky-500 outline-none py-1 text-sm" style="color: #111;" placeholder="e.g. Board, Young Leaders, Family">
+                                        </div>
+                                    </div>
+                                    <div class="mt-2">
+                                        <label class="text-xs font-semibold text-sky-600 uppercase">Notes</label>
+                                        <textarea x-model="mission.notes" @input="autoSave()" rows="1" class="mt-0.5 w-full bg-transparent border-b border-dashed border-sky-300 focus:border-sky-500 outline-none py-1 text-sm resize-y" style="color: #111;" placeholder="Additional notes..."></textarea>
+                                    </div>
+                                    <button @click="removeMission(fed.id, mission.id)" class="absolute top-2 right-2 text-red-400 hover:text-red-600 opacity-0 group-hover:opacity-100 transition no-print" title="Remove mission">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                    </button>
+                                </div>
+                            </template>
+                            <template x-if="(fed.missions||[]).length === 0">
+                                <p class="text-sm text-gray-400 italic">No missions yet. Click + Add Mission to add one.</p>
+                            </template>
+                        </div>
+                    </section>
+
                     <!-- COMMUNITY EVENTS -->
                     <section>
                         <div class="flex items-center justify-between mb-3">
@@ -790,6 +832,35 @@
             <div class="flex gap-3 mt-5">
                 <button @click="addAllocation()" class="flex-1 bg-brand-500 hover:bg-brand-600 text-white py-2 rounded-lg font-medium transition">Add Allocation</button>
                 <button @click="showAddAllocModal=false" class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 py-2 rounded-lg font-medium transition">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ADD MISSION -->
+    <div x-show="showAddMissionModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" @click.self="showAddMissionModal=false">
+        <div class="bg-white rounded-2xl shadow-xl p-6 w-full max-w-md" @click.stop>
+            <h3 class="text-xl font-bold text-sky-700 mb-4">Add New Mission</h3>
+            <div class="space-y-3">
+                <div>
+                    <label class="text-xs font-semibold text-gray-500 uppercase">Dates</label>
+                    <input x-model="newMission.dates" placeholder="e.g. Mar 15-22, 2026" class="w-full border-2 border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:border-sky-500" style="color: #111;">
+                </div>
+                <div>
+                    <label class="text-xs font-semibold text-gray-500 uppercase">Destination</label>
+                    <input x-model="newMission.destination" placeholder="e.g. Israel" class="w-full border-2 border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:border-sky-500" style="color: #111;">
+                </div>
+                <div>
+                    <label class="text-xs font-semibold text-gray-500 uppercase">Type of Delegation</label>
+                    <input x-model="newMission.delegationType" placeholder="e.g. Board, Young Leaders, Family, Solidarity" class="w-full border-2 border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:border-sky-500" style="color: #111;">
+                </div>
+                <div>
+                    <label class="text-xs font-semibold text-gray-500 uppercase">Notes</label>
+                    <textarea x-model="newMission.notes" rows="2" placeholder="Additional notes..." class="w-full border-2 border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:border-sky-500 resize-y" style="color: #111;"></textarea>
+                </div>
+            </div>
+            <div class="flex gap-3 mt-5">
+                <button @click="addMission()" class="flex-1 bg-sky-600 hover:bg-sky-700 text-white py-2 rounded-lg font-medium transition">Add Mission</button>
+                <button @click="showAddMissionModal=false" class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 py-2 rounded-lg font-medium transition">Cancel</button>
             </div>
         </div>
     </div>
@@ -1136,7 +1207,7 @@ function migrateRawData(raw) {
     const result = { _version: 2, _lastModified: new Date().toISOString(), federations: {} };
     for (const [rawName, rows] of Object.entries(raw)) {
         const m = meta[rawName]; if (!m) continue;
-        const fed = { id: m.id, name: m.name, region: 'NE', community: { population: null, annualBudget: null, controls: null, details: null, summerCamps: null, partnership: null }, people: [], allocations: [], shlichut: [], jafiPrograms: [], opportunities: [], visits: [], tasks: [], notes: '', websiteInfo: { website:'', address:'', phone:'', email:'', mission:'', focusAreas:[], programs:[], charityRating:'', givingOptions:[] }, communityEvents: [] };
+        const fed = { id: m.id, name: m.name, region: 'NE', community: { population: null, annualBudget: null, controls: null, details: null, summerCamps: null, partnership: null }, people: [], allocations: [], shlichut: [], jafiPrograms: [], opportunities: [], visits: [], tasks: [], missions: [], notes: '', websiteInfo: { website:'', address:'', phone:'', email:'', mission:'', focusAreas:[], programs:[], charityRating:'', givingOptions:[] }, communityEvents: [] };
         let currentCat = 'Federation', pIdx = 0, aIdx = 0, vIdx = 0;
         const detailParts = [];
         for (const row of rows) {
@@ -1196,6 +1267,8 @@ function ensureNewFields(data) {
         }
         // Ensure tasks array exists
         if (!fed.tasks) fed.tasks = [];
+        // Ensure missions array exists
+        if (!fed.missions) fed.missions = [];
         // Ensure partnership field exists
         if (fed.community && fed.community.partnership === undefined) fed.community.partnership = null;
         // Ensure all visits have a documents array
@@ -1232,13 +1305,14 @@ function ensureNewFields(data) {
 document.addEventListener('alpine:init', () => {
     Alpine.data('dashboard', () => ({
         data: null, searchTerm: '', activeRegion: 'All', expanded: {}, sections: {}, saveIndicator: false,
-        showAddPersonModal: false, showEditPersonModal: false, showAddVisitModal: false, showAddAllocModal: false, showAddFedModal: false, showImportModal: false, showAddEventModal: false, currentFedId: null,
+        showAddPersonModal: false, showEditPersonModal: false, showAddVisitModal: false, showAddAllocModal: false, showAddFedModal: false, showImportModal: false, showAddEventModal: false, showAddMissionModal: false, currentFedId: null,
         newPerson: { name:'', role:'', category:'Federation', email:'', phone:'' },
         editingPerson: { id:'', name:'', role:'', category:'Federation', email:'', phone:'' },
         newVisit: { date:'', description:'', notes:'' }, pendingFiles: [],
         newAlloc: { program:'', amount_24_25:'', amount_25_26:'', amount_26_27:'' },
         newFed: { name:'', region:'NE' },
         newEvent: { name:'', date:'', time:'', location:'', cost:'', description:'', category:'Other' },
+        newMission: { dates:'', destination:'', delegationType:'', notes:'' },
         newTaskText: '',
         newGeneralTaskText: { galNA: '', adi: '', general: '' },
         dragPerson: null, dragFedId: null,
@@ -1295,6 +1369,7 @@ document.addEventListener('alpine:init', () => {
             if (fed.websiteInfo && fed.websiteInfo.programs && fed.websiteInfo.programs.some(p => p.toLowerCase().includes(term))) return true;
             if (fed.communityEvents && fed.communityEvents.some(e => (e.name+' '+e.description+' '+e.date).toLowerCase().includes(term))) return true;
             if (fed.tasks && fed.tasks.some(t => t.text.toLowerCase().includes(term))) return true;
+            if (fed.missions && fed.missions.some(m => (m.dates+' '+m.destination+' '+m.delegationType+' '+m.notes).toLowerCase().includes(term))) return true;
             return false;
         },
 
@@ -1392,6 +1467,10 @@ document.addEventListener('alpine:init', () => {
         addEvent() { if (!this.newEvent.name.trim()) return alert('Please enter an event name'); const fed = this.data.federations[this.currentFedId]; if (!fed) return; if (!fed.communityEvents) fed.communityEvents = []; fed.communityEvents.push({ id: genId(this.currentFedId+'-e'), name: this.newEvent.name.trim(), date: this.newEvent.date.trim(), time: this.newEvent.time.trim(), location: this.newEvent.location.trim(), cost: this.newEvent.cost.trim(), description: this.newEvent.description.trim(), category: this.newEvent.category }); this.newEvent = { name:'', date:'', time:'', location:'', cost:'', description:'', category:'Other' }; this.showAddEventModal = false; this.autoSave(); },
         removeEvent(fedId, eventId) { if (!confirm('Remove this event?')) return; const fed = this.data.federations[fedId]; fed.communityEvents = fed.communityEvents.filter(e => e.id !== eventId); this.autoSave(); },
 
+        // Mission methods
+        addMission() { if (!this.newMission.dates.trim() && !this.newMission.destination.trim()) return alert('Please enter dates or destination'); const fed = this.data.federations[this.currentFedId]; if (!fed) return; if (!fed.missions) fed.missions = []; fed.missions.push({ id: genId(this.currentFedId+'-m'), dates: this.newMission.dates.trim(), destination: this.newMission.destination.trim(), delegationType: this.newMission.delegationType.trim(), notes: this.newMission.notes.trim() }); this.newMission = { dates:'', destination:'', delegationType:'', notes:'' }; this.showAddMissionModal = false; this.autoSave(); },
+        removeMission(fedId, missionId) { if (!confirm('Remove this mission?')) return; const fed = this.data.federations[fedId]; fed.missions = fed.missions.filter(m => m.id !== missionId); this.autoSave(); },
+
         // Task methods (per-federation)
         addTask(fedId) { const text = this.newTaskText.trim(); if (!text) return; const fed = this.data.federations[fedId]; if (!fed) return; if (!fed.tasks) fed.tasks = []; fed.tasks.push({ id: genId(fedId+'-t'), text: text, done: false, createdAt: new Date().toISOString() }); this.newTaskText = ''; this.autoSave(); },
         toggleTask(fedId, taskId) { const fed = this.data.federations[fedId]; if (!fed || !fed.tasks) return; const task = fed.tasks.find(t => t.id === taskId); if (task) { task.done = !task.done; this.autoSave(); } },
@@ -1403,7 +1482,7 @@ document.addEventListener('alpine:init', () => {
         removeGeneralTask(category, taskId) { if (!confirm('Remove this task?')) return; if (!this.data.generalTasks || !this.data.generalTasks[category]) return; this.data.generalTasks[category] = this.data.generalTasks[category].filter(t => t.id !== taskId); this.autoSave(); },
         get generalTasksCount() { if (!this.data || !this.data.generalTasks) return 0; return ['galNA','adi','general'].reduce((s,c) => s + (this.data.generalTasks[c]||[]).filter(t=>!t.done).length, 0); },
 
-        addFederation() { if (!this.newFed.name.trim()) return alert('Please enter a name'); const id = this.newFed.name.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/-+$/,''); if (this.data.federations[id]) return alert('A federation with a similar name already exists'); this.data.federations[id] = { id, name: this.newFed.name.trim(), region: this.newFed.region||'NE', community: { population:null, annualBudget:null, controls:null, details:null, summerCamps:null, partnership:null }, people:[], allocations:[], shlichut:[], jafiPrograms:[], opportunities:[], visits:[], tasks:[], notes:'', websiteInfo: { website:'', address:'', phone:'', email:'', mission:'', focusAreas:[], programs:[], charityRating:'', givingOptions:[] }, communityEvents:[] }; this.expanded[id] = true; this.newFed = { name:'', region:'NE' }; this.showAddFedModal = false; this.autoSave(); },
+        addFederation() { if (!this.newFed.name.trim()) return alert('Please enter a name'); const id = this.newFed.name.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/-+$/,''); if (this.data.federations[id]) return alert('A federation with a similar name already exists'); this.data.federations[id] = { id, name: this.newFed.name.trim(), region: this.newFed.region||'NE', community: { population:null, annualBudget:null, controls:null, details:null, summerCamps:null, partnership:null }, people:[], allocations:[], shlichut:[], jafiPrograms:[], opportunities:[], visits:[], tasks:[], missions:[], notes:'', websiteInfo: { website:'', address:'', phone:'', email:'', mission:'', focusAreas:[], programs:[], charityRating:'', givingOptions:[] }, communityEvents:[] }; this.expanded[id] = true; this.newFed = { name:'', region:'NE' }; this.showAddFedModal = false; this.autoSave(); },
 
         exportToExcel() {
             const wb = XLSX.utils.book_new();
@@ -1418,6 +1497,7 @@ document.addEventListener('alpine:init', () => {
                 rows.push(['=== KEY PEOPLE ===']); rows.push(['Name','Role','Category','Email','Phone']); fed.people.forEach(p => rows.push([p.name, p.role, p.category, p.email, p.phone])); rows.push([]);
                 rows.push(['=== ALLOCATIONS ===']); rows.push(['Program','2024-25',al.col2,al.col3,'Notes']); fed.allocations.forEach(a => rows.push([a.program, a.amount_24_25||'', a.amount_25_26||'', a.amount_26_27||'', a.notes||''])); rows.push([]);
                 rows.push(['=== VISITS ===']); rows.push(['Date','Description','Notes','Documents']); fed.visits.forEach(v => rows.push([v.date, v.description, v.notes, (v.documents||[]).map(d=>d.name).join('; ')])); rows.push([]);
+                if (fed.missions && fed.missions.length > 0) { rows.push(['=== MISSIONS ===']); rows.push(['Dates','Destination','Type of Delegation','Notes']); fed.missions.forEach(m => rows.push([m.dates, m.destination, m.delegationType, m.notes])); rows.push([]); }
                 if (fed.communityEvents && fed.communityEvents.length > 0) { rows.push(['=== COMMUNITY EVENTS ===']); rows.push(['Name','Date','Time','Location','Cost','Category','Description']); fed.communityEvents.forEach(e => rows.push([e.name, e.date, e.time, e.location, e.cost, e.category, e.description])); rows.push([]); }
                 rows.push(['=== SHLICHUT ===']); fed.shlichut.forEach(s => rows.push([s])); rows.push([]);
                 rows.push(['=== JAFI PROGRAMS ===']); fed.jafiPrograms.forEach(p => rows.push([p])); rows.push([]);
