@@ -279,6 +279,57 @@
                         </div>
                     </section>
 
+                    <!-- OPPORTUNITIES & PROGRAMMING -->
+                    <section>
+                        <h3 @click="toggleSection(fed.id,'opportunities')" class="flex items-center gap-2 text-lg font-semibold text-brand-600 cursor-pointer mb-2">
+                            <span>Opportunities & Programming</span>
+                            <svg :class="sections[fed.id+'-opportunities'] ? 'rotate-180' : ''" class="w-4 h-4 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                        </h3>
+                        <div x-show="sections[fed.id+'-opportunities'] !== false" class="space-y-1">
+                            <template x-for="(item, idx) in fed.opportunities" :key="idx">
+                                <div class="bg-white border-l-4 border-brand-500 rounded-r px-3 py-2 flex justify-between items-start group">
+                                    <input :value="item" @blur="fed.opportunities[idx]=$event.target.value; autoSave()" class="bg-transparent w-full outline-none text-sm">
+                                    <button @click="fed.opportunities.splice(idx,1); autoSave()" class="text-red-400 hover:text-red-600 opacity-0 group-hover:opacity-100 ml-2 shrink-0 no-print">&times;</button>
+                                </div>
+                            </template>
+                            <button @click="fed.opportunities.push(''); autoSave()" class="text-sm text-brand-500 hover:text-brand-600 mt-1 no-print">+ Add Opportunity</button>
+                        </div>
+                    </section>
+
+                    <!-- SHLICHUT & JAFI PROGRAMS -->
+                    <section>
+                        <h3 @click="toggleSection(fed.id,'programs')" class="flex items-center gap-2 text-lg font-semibold text-brand-600 cursor-pointer mb-2">
+                            <span>Shlichut & JAFI Programs</span>
+                            <svg :class="sections[fed.id+'-programs'] ? 'rotate-180' : ''" class="w-4 h-4 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                        </h3>
+                        <div x-show="sections[fed.id+'-programs'] !== false" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <h4 class="text-sm font-semibold text-gray-600 mb-2">Shlichut Programs</h4>
+                                <div class="space-y-1">
+                                    <template x-for="(item, idx) in fed.shlichut" :key="idx">
+                                        <div class="bg-gray-50 rounded px-3 py-2 flex justify-between items-center group">
+                                            <input :value="item" @blur="fed.shlichut[idx]=$event.target.value; autoSave()" class="bg-transparent w-full outline-none">
+                                            <button @click="fed.shlichut.splice(idx,1); autoSave()" class="text-red-400 hover:text-red-600 opacity-0 group-hover:opacity-100 ml-2 no-print">&times;</button>
+                                        </div>
+                                    </template>
+                                    <button @click="fed.shlichut.push(''); autoSave()" class="text-sm text-brand-500 hover:text-brand-600 mt-1 no-print">+ Add Program</button>
+                                </div>
+                            </div>
+                            <div>
+                                <h4 class="text-sm font-semibold text-gray-600 mb-2">JAFI Programs</h4>
+                                <div class="space-y-1">
+                                    <template x-for="(item, idx) in fed.jafiPrograms" :key="idx">
+                                        <div class="bg-gray-50 rounded px-3 py-2 flex justify-between items-center group">
+                                            <input :value="item" @blur="fed.jafiPrograms[idx]=$event.target.value; autoSave()" class="bg-transparent w-full outline-none">
+                                            <button @click="fed.jafiPrograms.splice(idx,1); autoSave()" class="text-red-400 hover:text-red-600 opacity-0 group-hover:opacity-100 ml-2 no-print">&times;</button>
+                                        </div>
+                                    </template>
+                                    <button @click="fed.jafiPrograms.push(''); autoSave()" class="text-sm text-brand-500 hover:text-brand-600 mt-1 no-print">+ Add Program</button>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
                     <!-- COMMUNITY INFO -->
                     <section>
                         <h3 @click="toggleSection(fed.id,'community')" class="flex items-center gap-2 text-lg font-semibold text-brand-600 cursor-pointer mb-3">
@@ -611,48 +662,6 @@
                                 </div>
                             </template>
                             <template x-if="fed.visits.length === 0"><p class="text-gray-400 text-sm italic">No visits scheduled</p></template>
-                        </div>
-                    </section>
-
-                    <!-- SHLICHUT & JAFI PROGRAMS -->
-                    <section class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <h3 class="text-lg font-semibold text-brand-600 mb-2">Shlichut Programs</h3>
-                            <div class="space-y-1">
-                                <template x-for="(item, idx) in fed.shlichut" :key="idx">
-                                    <div class="bg-gray-50 rounded px-3 py-2 flex justify-between items-center group">
-                                        <input :value="item" @blur="fed.shlichut[idx]=$event.target.value; autoSave()" class="bg-transparent w-full outline-none">
-                                        <button @click="fed.shlichut.splice(idx,1); autoSave()" class="text-red-400 hover:text-red-600 opacity-0 group-hover:opacity-100 ml-2 no-print">&times;</button>
-                                    </div>
-                                </template>
-                                <button @click="fed.shlichut.push(''); autoSave()" class="text-sm text-brand-500 hover:text-brand-600 mt-1 no-print">+ Add Program</button>
-                            </div>
-                        </div>
-                        <div>
-                            <h3 class="text-lg font-semibold text-brand-600 mb-2">JAFI Programs</h3>
-                            <div class="space-y-1">
-                                <template x-for="(item, idx) in fed.jafiPrograms" :key="idx">
-                                    <div class="bg-gray-50 rounded px-3 py-2 flex justify-between items-center group">
-                                        <input :value="item" @blur="fed.jafiPrograms[idx]=$event.target.value; autoSave()" class="bg-transparent w-full outline-none">
-                                        <button @click="fed.jafiPrograms.splice(idx,1); autoSave()" class="text-red-400 hover:text-red-600 opacity-0 group-hover:opacity-100 ml-2 no-print">&times;</button>
-                                    </div>
-                                </template>
-                                <button @click="fed.jafiPrograms.push(''); autoSave()" class="text-sm text-brand-500 hover:text-brand-600 mt-1 no-print">+ Add Program</button>
-                            </div>
-                        </div>
-                    </section>
-
-                    <!-- OPPORTUNITIES -->
-                    <section>
-                        <h3 class="text-lg font-semibold text-brand-600 mb-2">Opportunities & Programming</h3>
-                        <div class="space-y-1">
-                            <template x-for="(item, idx) in fed.opportunities" :key="idx">
-                                <div class="bg-white border-l-4 border-brand-500 rounded-r px-3 py-2 flex justify-between items-start group">
-                                    <input :value="item" @blur="fed.opportunities[idx]=$event.target.value; autoSave()" class="bg-transparent w-full outline-none text-sm">
-                                    <button @click="fed.opportunities.splice(idx,1); autoSave()" class="text-red-400 hover:text-red-600 opacity-0 group-hover:opacity-100 ml-2 shrink-0 no-print">&times;</button>
-                                </div>
-                            </template>
-                            <button @click="fed.opportunities.push(''); autoSave()" class="text-sm text-brand-500 hover:text-brand-600 mt-1 no-print">+ Add Opportunity</button>
                         </div>
                     </section>
 
