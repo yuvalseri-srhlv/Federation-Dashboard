@@ -691,11 +691,41 @@
                                         <tr class="border-b border-gray-100 hover:bg-gray-50">
                                             <td class="p-3" x-text="alloc.program + (alloc.notes ? ' (' + alloc.notes + ')' : '')"></td>
                                             <td class="p-3 text-right text-green-600 font-semibold" x-text="fmtCur(alloc.amount_24_25)"></td>
-                                            <td class="p-3 text-right">
-                                                <input type="text" :value="alloc.amount_25_26 ? fmtCur(alloc.amount_25_26) : ''" @blur="alloc.amount_25_26=parseAmt($event.target.value); autoSave()" placeholder="$0" class="w-24 text-right border border-gray-200 rounded px-2 py-1 focus:outline-none focus:border-brand-500 text-green-600 font-semibold">
+                                            <td class="p-3">
+                                                <div class="flex items-center justify-end gap-1">
+                                                    <input type="text" :value="alloc.amount_25_26 ? fmtCur(alloc.amount_25_26) : ''" @blur="alloc.amount_25_26=parseAmt($event.target.value); autoSave()" placeholder="$0" class="w-24 text-right border border-gray-200 rounded px-2 py-1 focus:outline-none focus:border-brand-500 text-green-600 font-semibold">
+                                                    <button @click="attachToAlloc(fed.id, alloc.id, 'docs_25_26')" class="text-gray-400 hover:text-brand-600 shrink-0 no-print" title="Attach report">
+                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/></svg>
+                                                    </button>
+                                                </div>
+                                                <template x-if="(alloc.docs_25_26||[]).length > 0">
+                                                    <div class="flex flex-wrap gap-1 mt-1">
+                                                        <template x-for="doc in alloc.docs_25_26" :key="doc.id">
+                                                            <span class="inline-flex items-center gap-1 bg-blue-50 text-blue-700 text-xs rounded px-1.5 py-0.5 group/doc">
+                                                                <button @click="downloadDocument(doc)" class="hover:underline truncate max-w-[100px]" x-text="doc.name" :title="doc.name"></button>
+                                                                <button @click="removeAllocDoc(fed.id, alloc.id, 'docs_25_26', doc.id)" class="text-red-400 hover:text-red-600 opacity-0 group-hover/doc:opacity-100 no-print">&times;</button>
+                                                            </span>
+                                                        </template>
+                                                    </div>
+                                                </template>
                                             </td>
-                                            <td class="p-3 text-right">
-                                                <input type="text" :value="alloc.amount_26_27 ? fmtCur(alloc.amount_26_27) : ''" @blur="alloc.amount_26_27=parseAmt($event.target.value); autoSave()" placeholder="$0" class="w-24 text-right border border-gray-200 rounded px-2 py-1 focus:outline-none focus:border-brand-500">
+                                            <td class="p-3">
+                                                <div class="flex items-center justify-end gap-1">
+                                                    <input type="text" :value="alloc.amount_26_27 ? fmtCur(alloc.amount_26_27) : ''" @blur="alloc.amount_26_27=parseAmt($event.target.value); autoSave()" placeholder="$0" class="w-24 text-right border border-gray-200 rounded px-2 py-1 focus:outline-none focus:border-brand-500">
+                                                    <button @click="attachToAlloc(fed.id, alloc.id, 'docs_26_27')" class="text-gray-400 hover:text-brand-600 shrink-0 no-print" title="Attach report">
+                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/></svg>
+                                                    </button>
+                                                </div>
+                                                <template x-if="(alloc.docs_26_27||[]).length > 0">
+                                                    <div class="flex flex-wrap gap-1 mt-1">
+                                                        <template x-for="doc in alloc.docs_26_27" :key="doc.id">
+                                                            <span class="inline-flex items-center gap-1 bg-blue-50 text-blue-700 text-xs rounded px-1.5 py-0.5 group/doc">
+                                                                <button @click="downloadDocument(doc)" class="hover:underline truncate max-w-[100px]" x-text="doc.name" :title="doc.name"></button>
+                                                                <button @click="removeAllocDoc(fed.id, alloc.id, 'docs_26_27', doc.id)" class="text-red-400 hover:text-red-600 opacity-0 group-hover/doc:opacity-100 no-print">&times;</button>
+                                                            </span>
+                                                        </template>
+                                                    </div>
+                                                </template>
                                             </td>
                                             <td class="p-3 no-print"><button @click="removeAllocation(fed.id, alloc.id)" class="text-red-400 hover:text-red-600">&times;</button></td>
                                         </tr>
@@ -1300,6 +1330,8 @@ function ensureNewFields(data) {
         if (fed.community && fed.community.partnership === undefined) fed.community.partnership = null;
         // Ensure all visits have a documents array
         if (fed.visits) { for (const v of fed.visits) { if (!v.documents) v.documents = []; } }
+        // Ensure all allocations have document arrays for col2 and col3
+        if (fed.allocations) { for (const a of fed.allocations) { if (!a.docs_25_26) a.docs_25_26 = []; if (!a.docs_26_27) a.docs_26_27 = []; } }
         // Apply name corrections, title corrections, and contact info to people
         if (fed.people) {
             for (const p of fed.people) {
@@ -1488,8 +1520,10 @@ document.addEventListener('alpine:init', () => {
         removeDocument(fedId, visitId, docId) { if (!confirm('Remove this document?')) return; const fed = this.data.federations[fedId]; const visit = fed.visits.find(v => v.id === visitId); if (visit && visit.documents) { visit.documents = visit.documents.filter(d => d.id !== docId); this.autoSave(); } },
         async attachToVisit(fedId, visitId) { const input = document.createElement('input'); input.type = 'file'; input.accept = '.pdf,.doc,.docx'; input.multiple = true; input.onchange = async (e) => { const files = Array.from(e.target.files); if (!files.length) return; const docs = await this.readFilesAsBase64(files); const fed = this.data.federations[fedId]; const visit = fed.visits.find(v => v.id === visitId); if (visit) { if (!visit.documents) visit.documents = []; visit.documents.push(...docs); this.autoSave(); } }; input.click(); },
 
-        addAllocation() { if (!this.newAlloc.program.trim()) return alert('Please enter a program name'); const fed = this.data.federations[this.currentFedId]; if (!fed) return; fed.allocations.push({ id: genId(this.currentFedId+'-a'), program: this.newAlloc.program.trim(), amount_24_25: parseAmt(this.newAlloc.amount_24_25), amount_25_26: parseAmt(this.newAlloc.amount_25_26), amount_26_27: parseAmt(this.newAlloc.amount_26_27), notes:'' }); this.newAlloc = { program:'', amount_24_25:'', amount_25_26:'', amount_26_27:'' }; this.showAddAllocModal = false; this.autoSave(); },
+        addAllocation() { if (!this.newAlloc.program.trim()) return alert('Please enter a program name'); const fed = this.data.federations[this.currentFedId]; if (!fed) return; fed.allocations.push({ id: genId(this.currentFedId+'-a'), program: this.newAlloc.program.trim(), amount_24_25: parseAmt(this.newAlloc.amount_24_25), amount_25_26: parseAmt(this.newAlloc.amount_25_26), amount_26_27: parseAmt(this.newAlloc.amount_26_27), notes:'', docs_25_26: [], docs_26_27: [] }); this.newAlloc = { program:'', amount_24_25:'', amount_25_26:'', amount_26_27:'' }; this.showAddAllocModal = false; this.autoSave(); },
         removeAllocation(fedId, allocId) { if (!confirm('Remove this allocation?')) return; this.data.federations[fedId].allocations = this.data.federations[fedId].allocations.filter(a => a.id !== allocId); this.autoSave(); },
+        async attachToAlloc(fedId, allocId, yearKey) { const input = document.createElement('input'); input.type = 'file'; input.accept = '.pdf,.doc,.docx,.jpg,.jpeg,.png'; input.multiple = true; input.onchange = async (e) => { const files = Array.from(e.target.files); if (!files.length) return; for (const f of files) { if (f.size > 5*1024*1024) { alert(f.name + ' is over 5MB and may cause storage issues.'); } } const docs = await this.readFilesAsBase64(files); const fed = this.data.federations[fedId]; const alloc = fed.allocations.find(a => a.id === allocId); if (alloc) { if (!alloc[yearKey]) alloc[yearKey] = []; alloc[yearKey].push(...docs); this.autoSave(); } }; input.click(); },
+        removeAllocDoc(fedId, allocId, yearKey, docId) { if (!confirm('Remove this document?')) return; const fed = this.data.federations[fedId]; const alloc = fed.allocations.find(a => a.id === allocId); if (alloc && alloc[yearKey]) { alloc[yearKey] = alloc[yearKey].filter(d => d.id !== docId); this.autoSave(); } },
 
         addEvent() { if (!this.newEvent.name.trim()) return alert('Please enter an event name'); const fed = this.data.federations[this.currentFedId]; if (!fed) return; if (!fed.communityEvents) fed.communityEvents = []; fed.communityEvents.push({ id: genId(this.currentFedId+'-e'), name: this.newEvent.name.trim(), date: this.newEvent.date.trim(), time: this.newEvent.time.trim(), location: this.newEvent.location.trim(), cost: this.newEvent.cost.trim(), description: this.newEvent.description.trim(), category: this.newEvent.category }); this.newEvent = { name:'', date:'', time:'', location:'', cost:'', description:'', category:'Other' }; this.showAddEventModal = false; this.autoSave(); },
         removeEvent(fedId, eventId) { if (!confirm('Remove this event?')) return; const fed = this.data.federations[fedId]; fed.communityEvents = fed.communityEvents.filter(e => e.id !== eventId); this.autoSave(); },
@@ -1522,7 +1556,7 @@ document.addEventListener('alpine:init', () => {
                 rows.push(['=== COMMUNITY INFO ===']); rows.push(['Population', fed.community.population||'']); rows.push(['Annual Budget', fed.community.annualBudget||'']); rows.push(['Controls', fed.community.controls||'']); rows.push(['Partnership', fed.community.partnership||'']); rows.push(['Details', fed.community.details||'']); rows.push(['Summer Camps', fed.community.summerCamps||'']); rows.push([]);
                 if (fed.websiteInfo) { rows.push(['=== WEBSITE INFO ===']); rows.push(['Website', fed.websiteInfo.website||'']); rows.push(['Address', fed.websiteInfo.address||'']); rows.push(['Phone', fed.websiteInfo.phone||'']); rows.push(['Email', fed.websiteInfo.email||'']); rows.push(['Mission', fed.websiteInfo.mission||'']); rows.push(['Charity Rating', fed.websiteInfo.charityRating||'']); rows.push(['Focus Areas', (fed.websiteInfo.focusAreas||[]).join('; ')]); rows.push(['Programs', (fed.websiteInfo.programs||[]).join('; ')]); rows.push(['Giving Options', (fed.websiteInfo.givingOptions||[]).join('; ')]); rows.push([]); }
                 rows.push(['=== KEY PEOPLE ===']); rows.push(['Name','Role','Category','Email','Phone']); fed.people.forEach(p => rows.push([p.name, p.role, p.category, p.email, p.phone])); rows.push([]);
-                rows.push(['=== ALLOCATIONS ===']); rows.push(['Program','2024-25',al.col2,al.col3,'Notes']); fed.allocations.forEach(a => rows.push([a.program, a.amount_24_25||'', a.amount_25_26||'', a.amount_26_27||'', a.notes||''])); rows.push([]);
+                rows.push(['=== ALLOCATIONS ===']); rows.push(['Program','2024-25',al.col2,al.col2+' Docs',al.col3,al.col3+' Docs','Notes']); fed.allocations.forEach(a => rows.push([a.program, a.amount_24_25||'', a.amount_25_26||'', (a.docs_25_26||[]).map(d=>d.name).join('; '), a.amount_26_27||'', (a.docs_26_27||[]).map(d=>d.name).join('; '), a.notes||''])); rows.push([]);
                 rows.push(['=== VISITS ===']); rows.push(['Date','Description','Notes','Documents']); fed.visits.forEach(v => rows.push([v.date, v.description, v.notes, (v.documents||[]).map(d=>d.name).join('; ')])); rows.push([]);
                 if (fed.missions && fed.missions.length > 0) { rows.push(['=== MISSIONS ===']); rows.push(['Dates','Destination','Type of Delegation','Notes']); fed.missions.forEach(m => rows.push([m.dates, m.destination, m.delegationType, m.notes])); rows.push([]); }
                 if (fed.communityEvents && fed.communityEvents.length > 0) { rows.push(['=== COMMUNITY EVENTS ===']); rows.push(['Name','Date','Time','Location','Cost','Category','Description']); fed.communityEvents.forEach(e => rows.push([e.name, e.date, e.time, e.location, e.cost, e.category, e.description])); rows.push([]); }
