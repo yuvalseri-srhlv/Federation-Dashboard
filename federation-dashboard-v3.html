@@ -689,7 +689,10 @@
                                 <tbody>
                                     <template x-for="alloc in fed.allocations" :key="alloc.id">
                                         <tr class="border-b border-gray-100 hover:bg-gray-50">
-                                            <td class="p-3" x-text="alloc.program + (alloc.notes ? ' (' + alloc.notes + ')' : '')"></td>
+                                            <td class="p-3">
+                                                <input type="text" x-model="alloc.program" @input="autoSave()" class="w-full bg-transparent border-b border-dashed border-transparent hover:border-gray-300 focus:border-brand-500 outline-none font-medium" style="color: #111;">
+                                                <template x-if="alloc.notes"><span class="text-xs text-gray-400" x-text="'(' + alloc.notes + ')'"></span></template>
+                                            </td>
                                             <td class="p-3 text-right text-green-600 font-semibold" x-text="fmtCur(alloc.amount_24_25)"></td>
                                             <td class="p-3">
                                                 <div class="flex items-center justify-end gap-1">
