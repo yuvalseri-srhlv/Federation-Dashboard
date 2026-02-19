@@ -128,7 +128,7 @@
             <svg :class="generalTasksOpen ? 'rotate-180' : ''" class="w-5 h-5 text-gray-400 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
         </div>
         <div x-show="generalTasksOpen" x-collapse class="border-t border-gray-100">
-            <div class="p-5 md:p-6 grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="p-5 md:p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
 
                 <!-- Gal and NA -->
                 <div>
@@ -206,6 +206,33 @@
                             </div>
                         </template>
                         <template x-if="(data.generalTasks.general||[]).length === 0">
+                            <p class="text-sm text-gray-400 italic">No tasks yet.</p>
+                        </template>
+                    </div>
+                </div>
+
+                <!-- Keshet -->
+                <div>
+                    <h3 class="text-base font-bold text-rose-600 mb-3 flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg>
+                        Keshet
+                        <span class="text-xs font-normal text-gray-400" x-text="'(' + (data.generalTasks.keshet||[]).filter(t=>!t.done).length + ' open)'"></span>
+                    </h3>
+                    <div class="flex gap-2 mb-3">
+                        <input type="text" x-model="newGeneralTaskText.keshet" @keydown.enter="addGeneralTask('keshet')" placeholder="Add task..." class="flex-1 px-3 py-2 border border-rose-200 rounded-lg text-sm focus:ring-2 focus:ring-rose-400 focus:border-rose-400 outline-none" style="color: #111;">
+                        <button @click="addGeneralTask('keshet')" class="bg-rose-500 hover:bg-rose-600 text-white px-3 py-2 rounded-lg text-sm font-medium transition">+</button>
+                    </div>
+                    <div class="space-y-1 max-h-64 overflow-y-auto">
+                        <template x-for="task in (data.generalTasks.keshet||[])" :key="task.id">
+                            <div class="flex items-center gap-2 bg-rose-50 rounded-lg px-3 py-2 group hover:bg-rose-100 transition">
+                                <input type="checkbox" :checked="task.done" @change="toggleGeneralTask('keshet', task.id)" class="w-4 h-4 text-rose-500 border-rose-300 rounded focus:ring-rose-400 cursor-pointer">
+                                <span class="flex-1 text-sm" :class="task.done ? 'line-through text-gray-400' : 'text-gray-800'" x-text="task.text"></span>
+                                <button @click="removeGeneralTask('keshet', task.id)" class="opacity-0 group-hover:opacity-100 text-red-400 hover:text-red-600 transition" title="Remove">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                </button>
+                            </div>
+                        </template>
+                        <template x-if="(data.generalTasks.keshet||[]).length === 0">
                             <p class="text-sm text-gray-400 italic">No tasks yet.</p>
                         </template>
                     </div>
@@ -1314,7 +1341,7 @@ document.addEventListener('alpine:init', () => {
         newEvent: { name:'', date:'', time:'', location:'', cost:'', description:'', category:'Other' },
         newMission: { dates:'', destination:'', delegationType:'', notes:'' },
         newTaskText: '',
-        newGeneralTaskText: { galNA: '', adi: '', general: '' },
+        newGeneralTaskText: { galNA: '', adi: '', general: '', keshet: '' },
         dragPerson: null, dragFedId: null,
         generalTasksOpen: true,
         _saveTimer: null,
@@ -1322,11 +1349,11 @@ document.addEventListener('alpine:init', () => {
         init() {
             try {
                 const saved = store.load();
-                if (saved && saved.federations) { this.data = saved; ensureNewFields(this.data); if (!this.data.generalTasks) this.data.generalTasks = { galNA: [], adi: [], general: [] }; if (!this.data.allocLabels) this.data.allocLabels = { col2: '2025-26', col3: '2026-27' }; store.save(this.data); }
-                else { this.data = migrateRawData(RAW_DATA); this.data.generalTasks = { galNA: [], adi: [], general: [] }; this.data.allocLabels = { col2: '2025-26', col3: '2026-27' }; mergeLegacyStorage(this.data); store.save(this.data); }
+                if (saved && saved.federations) { this.data = saved; ensureNewFields(this.data); if (!this.data.generalTasks) this.data.generalTasks = { galNA: [], adi: [], general: [], keshet: [] }; if (!this.data.generalTasks.keshet) this.data.generalTasks.keshet = []; if (!this.data.allocLabels) this.data.allocLabels = { col2: '2025-26', col3: '2026-27' }; store.save(this.data); }
+                else { this.data = migrateRawData(RAW_DATA); this.data.generalTasks = { galNA: [], adi: [], general: [], keshet: [] }; this.data.allocLabels = { col2: '2025-26', col3: '2026-27' }; mergeLegacyStorage(this.data); store.save(this.data); }
                 const firstId = this.allFederations[0]?.id;
                 if (firstId) this.expanded[firstId] = true;
-            } catch(e) { console.error('Init error:', e); alert('Dashboard init error: ' + e.message + '. Try clicking Reset to fix.'); this.data = migrateRawData(RAW_DATA); this.data.generalTasks = { galNA: [], adi: [], general: [] }; this.data.allocLabels = { col2: '2025-26', col3: '2026-27' }; store.save(this.data); }
+            } catch(e) { console.error('Init error:', e); alert('Dashboard init error: ' + e.message + '. Try clicking Reset to fix.'); this.data = migrateRawData(RAW_DATA); this.data.generalTasks = { galNA: [], adi: [], general: [], keshet: [] }; this.data.allocLabels = { col2: '2025-26', col3: '2026-27' }; store.save(this.data); }
         },
 
         get allFederations() { return this.data ? Object.values(this.data.federations) : []; },
@@ -1477,10 +1504,10 @@ document.addEventListener('alpine:init', () => {
         removeTask(fedId, taskId) { if (!confirm('Remove this task?')) return; const fed = this.data.federations[fedId]; if (!fed) return; fed.tasks = fed.tasks.filter(t => t.id !== taskId); this.autoSave(); },
 
         // General task methods (global, 3 categories: galNA, adi, general)
-        addGeneralTask(category) { const text = this.newGeneralTaskText[category].trim(); if (!text) return; if (!this.data.generalTasks) this.data.generalTasks = { galNA: [], adi: [], general: [] }; if (!this.data.generalTasks[category]) this.data.generalTasks[category] = []; this.data.generalTasks[category].push({ id: genId('gt-'+category), text: text, done: false, createdAt: new Date().toISOString() }); this.newGeneralTaskText[category] = ''; this.autoSave(); },
+        addGeneralTask(category) { const text = this.newGeneralTaskText[category].trim(); if (!text) return; if (!this.data.generalTasks) this.data.generalTasks = { galNA: [], adi: [], general: [], keshet: [] }; if (!this.data.generalTasks[category]) this.data.generalTasks[category] = []; this.data.generalTasks[category].push({ id: genId('gt-'+category), text: text, done: false, createdAt: new Date().toISOString() }); this.newGeneralTaskText[category] = ''; this.autoSave(); },
         toggleGeneralTask(category, taskId) { if (!this.data.generalTasks || !this.data.generalTasks[category]) return; const task = this.data.generalTasks[category].find(t => t.id === taskId); if (task) { task.done = !task.done; this.autoSave(); } },
         removeGeneralTask(category, taskId) { if (!confirm('Remove this task?')) return; if (!this.data.generalTasks || !this.data.generalTasks[category]) return; this.data.generalTasks[category] = this.data.generalTasks[category].filter(t => t.id !== taskId); this.autoSave(); },
-        get generalTasksCount() { if (!this.data || !this.data.generalTasks) return 0; return ['galNA','adi','general'].reduce((s,c) => s + (this.data.generalTasks[c]||[]).filter(t=>!t.done).length, 0); },
+        get generalTasksCount() { if (!this.data || !this.data.generalTasks) return 0; return ['galNA','adi','general','keshet'].reduce((s,c) => s + (this.data.generalTasks[c]||[]).filter(t=>!t.done).length, 0); },
 
         addFederation() { if (!this.newFed.name.trim()) return alert('Please enter a name'); const id = this.newFed.name.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/-+$/,''); if (this.data.federations[id]) return alert('A federation with a similar name already exists'); this.data.federations[id] = { id, name: this.newFed.name.trim(), region: this.newFed.region||'NE', community: { population:null, annualBudget:null, controls:null, details:null, summerCamps:null, partnership:null }, people:[], allocations:[], shlichut:[], jafiPrograms:[], opportunities:[], visits:[], tasks:[], missions:[], notes:'', websiteInfo: { website:'', address:'', phone:'', email:'', mission:'', focusAreas:[], programs:[], charityRating:'', givingOptions:[] }, communityEvents:[] }; this.expanded[id] = true; this.newFed = { name:'', region:'NE' }; this.showAddFedModal = false; this.autoSave(); },
 
@@ -1507,13 +1534,13 @@ document.addEventListener('alpine:init', () => {
                 XLSX.utils.book_append_sheet(wb, ws, fed.name.substring(0,31).replace(/[:\\/?*\[\]]/g,''));
             }
             // General Tasks sheet
-            if (this.data.generalTasks) { const gtRows = [['=== GENERAL TASKS ==='],[]]; const cats = [{key:'galNA',label:'Gal and NA'},{key:'adi',label:'Adi'},{key:'general',label:'General'}]; for (const cat of cats) { gtRows.push(['--- '+cat.label+' ---']); gtRows.push(['Task','Status','Created']); for (const t of (this.data.generalTasks[cat.key]||[])) { gtRows.push([t.text, t.done?'Completed':'Open', t.createdAt?new Date(t.createdAt).toLocaleDateString():'']); } gtRows.push([]); } const gtws = XLSX.utils.aoa_to_sheet(gtRows); gtws['!cols'] = [{wch:40},{wch:12},{wch:15}]; XLSX.utils.book_append_sheet(wb, gtws, 'General Tasks'); }
+            if (this.data.generalTasks) { const gtRows = [['=== GENERAL TASKS ==='],[]]; const cats = [{key:'galNA',label:'Gal and NA'},{key:'adi',label:'Adi'},{key:'general',label:'General'},{key:'keshet',label:'Keshet'}]; for (const cat of cats) { gtRows.push(['--- '+cat.label+' ---']); gtRows.push(['Task','Status','Created']); for (const t of (this.data.generalTasks[cat.key]||[])) { gtRows.push([t.text, t.done?'Completed':'Open', t.createdAt?new Date(t.createdAt).toLocaleDateString():'']); } gtRows.push([]); } const gtws = XLSX.utils.aoa_to_sheet(gtRows); gtws['!cols'] = [{wch:40},{wch:12},{wch:15}]; XLSX.utils.book_append_sheet(wb, gtws, 'General Tasks'); }
             const sws = XLSX.utils.aoa_to_sheet(summaryRows); sws['!cols'] = [{wch:35},{wch:10},{wch:15},{wch:15},{wch:15},{wch:10},{wch:10}]; XLSX.utils.book_append_sheet(wb, sws, 'Summary', true);
             XLSX.writeFile(wb, 'Federation_Dashboard_'+new Date().toISOString().split('T')[0]+'.xlsx');
         },
         exportToJSON() { const blob = new Blob([JSON.stringify(this.data, null, 2)], {type:'application/json'}); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'federation-dashboard-backup-'+new Date().toISOString().split('T')[0]+'.json'; a.click(); },
         importFromJSON(event) { const file = event.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = (e) => { try { const imported = JSON.parse(e.target.result); if (!imported.federations) throw new Error('Invalid format'); if (!confirm('This will replace all current data. Continue?')) return; this.data = imported; ensureNewFields(this.data); store.save(this.data); this.showImportModal = false; this.flashSave(); } catch(err) { alert('Invalid JSON file: '+err.message); } }; reader.readAsText(file); },
-        resetData() { if (!confirm('Reset ALL data to the original dataset? This cannot be undone.')) return; if (!confirm('Are you absolutely sure? All your edits will be lost.')) return; store.clear(); this.data = migrateRawData(RAW_DATA); this.data.generalTasks = { galNA: [], adi: [], general: [] }; this.data.allocLabels = { col2: '2025-26', col3: '2026-27' }; store.save(this.data); this.flashSave(); }
+        resetData() { if (!confirm('Reset ALL data to the original dataset? This cannot be undone.')) return; if (!confirm('Are you absolutely sure? All your edits will be lost.')) return; store.clear(); this.data = migrateRawData(RAW_DATA); this.data.generalTasks = { galNA: [], adi: [], general: [], keshet: [] }; this.data.allocLabels = { col2: '2025-26', col3: '2026-27' }; store.save(this.data); this.flashSave(); }
     }));
 });
 </script>
