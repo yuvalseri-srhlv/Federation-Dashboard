@@ -130,6 +130,33 @@
         <div x-show="generalTasksOpen" x-collapse class="border-t border-gray-100">
             <div class="p-5 md:p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
 
+                <!-- General -->
+                <div>
+                    <h3 class="text-base font-bold text-teal-600 mb-3 flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+                        General
+                        <span class="text-xs font-normal text-gray-400" x-text="'(' + (data.generalTasks.general||[]).filter(t=>!t.done).length + ' open)'"></span>
+                    </h3>
+                    <div class="flex gap-2 mb-3">
+                        <input type="text" x-model="newGeneralTaskText.general" @keydown.enter="addGeneralTask('general')" placeholder="Add task..." class="flex-1 px-3 py-2 border border-teal-200 rounded-lg text-sm focus:ring-2 focus:ring-teal-400 focus:border-teal-400 outline-none" style="color: #111;">
+                        <button @click="addGeneralTask('general')" class="bg-teal-500 hover:bg-teal-600 text-white px-3 py-2 rounded-lg text-sm font-medium transition">+</button>
+                    </div>
+                    <div class="space-y-1 max-h-64 overflow-y-auto">
+                        <template x-for="task in (data.generalTasks.general||[])" :key="task.id">
+                            <div class="flex items-center gap-2 bg-teal-50 rounded-lg px-3 py-2 group hover:bg-teal-100 transition">
+                                <input type="checkbox" :checked="task.done" @change="toggleGeneralTask('general', task.id)" class="w-4 h-4 text-teal-500 border-teal-300 rounded focus:ring-teal-400 cursor-pointer">
+                                <span class="flex-1 text-sm" :class="task.done ? 'line-through text-gray-400' : 'text-gray-800'" x-text="task.text"></span>
+                                <button @click="removeGeneralTask('general', task.id)" class="opacity-0 group-hover:opacity-100 text-red-400 hover:text-red-600 transition" title="Remove">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                </button>
+                            </div>
+                        </template>
+                        <template x-if="(data.generalTasks.general||[]).length === 0">
+                            <p class="text-sm text-gray-400 italic">No tasks yet.</p>
+                        </template>
+                    </div>
+                </div>
+
                 <!-- Gal and NA -->
                 <div>
                     <h3 class="text-base font-bold text-indigo-600 mb-3 flex items-center gap-2">
@@ -179,33 +206,6 @@
                             </div>
                         </template>
                         <template x-if="(data.generalTasks.adi||[]).length === 0">
-                            <p class="text-sm text-gray-400 italic">No tasks yet.</p>
-                        </template>
-                    </div>
-                </div>
-
-                <!-- General -->
-                <div>
-                    <h3 class="text-base font-bold text-teal-600 mb-3 flex items-center gap-2">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
-                        General
-                        <span class="text-xs font-normal text-gray-400" x-text="'(' + (data.generalTasks.general||[]).filter(t=>!t.done).length + ' open)'"></span>
-                    </h3>
-                    <div class="flex gap-2 mb-3">
-                        <input type="text" x-model="newGeneralTaskText.general" @keydown.enter="addGeneralTask('general')" placeholder="Add task..." class="flex-1 px-3 py-2 border border-teal-200 rounded-lg text-sm focus:ring-2 focus:ring-teal-400 focus:border-teal-400 outline-none" style="color: #111;">
-                        <button @click="addGeneralTask('general')" class="bg-teal-500 hover:bg-teal-600 text-white px-3 py-2 rounded-lg text-sm font-medium transition">+</button>
-                    </div>
-                    <div class="space-y-1 max-h-64 overflow-y-auto">
-                        <template x-for="task in (data.generalTasks.general||[])" :key="task.id">
-                            <div class="flex items-center gap-2 bg-teal-50 rounded-lg px-3 py-2 group hover:bg-teal-100 transition">
-                                <input type="checkbox" :checked="task.done" @change="toggleGeneralTask('general', task.id)" class="w-4 h-4 text-teal-500 border-teal-300 rounded focus:ring-teal-400 cursor-pointer">
-                                <span class="flex-1 text-sm" :class="task.done ? 'line-through text-gray-400' : 'text-gray-800'" x-text="task.text"></span>
-                                <button @click="removeGeneralTask('general', task.id)" class="opacity-0 group-hover:opacity-100 text-red-400 hover:text-red-600 transition" title="Remove">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                                </button>
-                            </div>
-                        </template>
-                        <template x-if="(data.generalTasks.general||[]).length === 0">
                             <p class="text-sm text-gray-400 italic">No tasks yet.</p>
                         </template>
                     </div>
