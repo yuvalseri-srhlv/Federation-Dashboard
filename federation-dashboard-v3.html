@@ -3,7 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#1e3c72">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Fed Dashboard">
     <title>NE Regional Director - Federation Dashboard</title>
+    <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIkZlZGVyYXRpb24gRGFzaGJvYXJkIiwKICAic2hvcnRfbmFtZSI6ICJGZWQgRGFzaGJvYXJkIiwKICAic3RhcnRfdXJsIjogIi4vZmVkZXJhdGlvbi1kYXNoYm9hcmQtdjMuaHRtbCIsCiAgImRpc3BsYXkiOiAic3RhbmRhbG9uZSIsCiAgImJhY2tncm91bmRfY29sb3IiOiAiIzFlM2M3MiIsCiAgInRoZW1lX2NvbG9yIjogIiMxZTNjNzIiLAogICJpY29ucyI6IFtdCn0=">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.8/dist/cdn.min.js"></script>
@@ -36,6 +41,19 @@
         @media print { .no-print { display: none !important; } .print-break { page-break-before: always; } }
     </style>
     <script>window.onerror = function(msg, src, line, col, err) { console.error('JS Error:', msg, 'at line', line); };</script>
+    <script>
+    // PWA install support
+    let deferredInstallPrompt = null;
+    window.addEventListener('beforeinstallprompt', function(e) {
+        e.preventDefault();
+        deferredInstallPrompt = e;
+        const btn = document.getElementById('pwa-install-btn');
+        if (btn) btn.style.display = 'inline-flex';
+    });
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('./sw.js').catch(function() {});
+    }
+    </script>
 </head>
 <body class="bg-gradient-to-br from-brand-600 to-brand-500 min-h-screen">
 
@@ -54,6 +72,7 @@
                 <button @click="showImportModal=true" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition">Import</button>
                 <button @click="showAddFedModal=true" class="bg-amber-500 hover:bg-amber-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition">+ Federation</button>
                 <button @click="resetData()" class="bg-red-100 hover:bg-red-200 text-red-700 px-4 py-2 rounded-lg text-sm font-medium transition">Reset</button>
+                <button id="pwa-install-btn" onclick="if(deferredInstallPrompt){deferredInstallPrompt.prompt();deferredInstallPrompt.userChoice.then(function(){deferredInstallPrompt=null;document.getElementById('pwa-install-btn').style.display='none';});}" style="display:none" class="bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition">📱 Install App</button>
             </div>
         </div>
     </header>
