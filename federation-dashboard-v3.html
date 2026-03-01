@@ -70,6 +70,7 @@
                 <button @click="exportToExcel()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition">Export Excel</button>
                 <button @click="exportToJSON()" class="bg-brand-500 hover:bg-brand-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition">Backup JSON</button>
                 <button @click="showImportModal=true" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition">Import</button>
+                <button @click="refreshEvents()" class="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition">🔄 Refresh Events</button>
                 <button @click="showAddFedModal=true" class="bg-amber-500 hover:bg-amber-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition">+ Federation</button>
                 <button @click="resetData()" class="bg-red-100 hover:bg-red-200 text-red-700 px-4 py-2 rounded-lg text-sm font-medium transition">Reset</button>
                 <button id="pwa-install-btn" onclick="if(deferredInstallPrompt){deferredInstallPrompt.prompt();deferredInstallPrompt.userChoice.then(function(){deferredInstallPrompt=null;document.getElementById('pwa-install-btn').style.display='none';});}" style="display:none" class="bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition">📱 Install App</button>
@@ -592,13 +593,39 @@
 
                     <!-- COMMUNITY EVENTS -->
                     <section>
-                        <div class="flex items-center justify-between mb-3">
-                            <h3 @click="toggleSection(fed.id,'events')" class="flex items-center gap-2 text-lg font-semibold text-purple-700 cursor-pointer">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                                <span x-text="'Community Events (' + (fed.communityEvents||[]).length + ')'"></span>
-                                <svg :class="sections[fed.id+'-events'] ? 'rotate-180' : ''" class="w-4 h-4 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-                            </h3>
+                        <div class="flex items-center justify-between mb-1">
+                            <div class="flex items-center gap-2">
+                                <h3 @click="toggleSection(fed.id,'events')" class="flex items-center gap-2 text-lg font-semibold text-purple-700 cursor-pointer">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                    <span x-text="'Community Events (' + (fed.communityEvents||[]).length + ')'"></span>
+                                    <svg :class="sections[fed.id+'-events'] ? 'rotate-180' : ''" class="w-4 h-4 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                                </h3>
+                                <!-- Info tooltip -->
+                                <div class="relative no-print" x-data="{ showTip: false }">
+                                    <button @click="showTip = !showTip" @click.outside="showTip = false" class="text-purple-400 hover:text-purple-600 transition">
+                                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/></svg>
+                                    </button>
+                                    <div x-show="showTip" x-transition class="absolute left-0 top-6 z-50 bg-gray-800 text-white text-xs rounded-lg p-3 w-72 shadow-lg">
+                                        <p class="font-semibold mb-1">How to update events:</p>
+                                        <ol class="list-decimal ml-3 space-y-1">
+                                            <li>Ask Claude: "Please check the federation websites and update the events"</li>
+                                            <li>Claude researches all 6 websites and updates the code</li>
+                                            <li>Claude pushes updated code to GitHub</li>
+                                            <li>On your laptop: download/copy the updated HTML file</li>
+                                            <li>Click <strong>🔄 Refresh Events</strong> button in the header</li>
+                                        </ol>
+                                        <p class="mt-2 text-gray-300 italic">New events merge in — your data stays safe.</p>
+                                    </div>
+                                </div>
+                            </div>
                             <button @click="currentFedId=fed.id; showAddEventModal=true" class="text-sm bg-purple-600 hover:bg-purple-700 text-white px-3 py-1.5 rounded-lg transition no-print">+ Add Event</button>
+                        </div>
+                        <!-- Last Updated -->
+                        <div class="flex items-center gap-2 mb-3 text-xs text-gray-400 no-print">
+                            <span>Last updated:</span>
+                            <input type="date" class="bg-transparent border-b border-gray-300 text-gray-500 text-xs px-1 py-0.5 focus:outline-none focus:border-purple-400"
+                                   :value="fed.eventsLastUpdated || data.eventsLastUpdated || ''"
+                                   @change="fed.eventsLastUpdated = $event.target.value; autoSave()">
                         </div>
                         <div x-show="sections[fed.id+'-events'] !== false" class="space-y-2">
                             <template x-for="event in (fed.communityEvents||[])" :key="event.id">
@@ -1375,6 +1402,8 @@ function ensureNewFields(data) {
         if (!fed.tasks) fed.tasks = [];
         // Ensure missions array exists
         if (!fed.missions) fed.missions = [];
+        // Ensure eventsLastUpdated field exists
+        if (!fed.eventsLastUpdated) fed.eventsLastUpdated = '';
         // Ensure partnership field exists
         if (fed.community && fed.community.partnership === undefined) fed.community.partnership = null;
         // Ensure all visits have a documents array
@@ -1623,7 +1652,26 @@ document.addEventListener('alpine:init', () => {
         },
         exportToJSON() { const blob = new Blob([JSON.stringify(this.data, null, 2)], {type:'application/json'}); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'federation-dashboard-backup-'+new Date().toISOString().split('T')[0]+'.json'; a.click(); },
         importFromJSON(event) { const file = event.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = (e) => { try { const imported = JSON.parse(e.target.result); if (!imported.federations) throw new Error('Invalid format'); if (!confirm('This will replace all current data. Continue?')) return; this.data = imported; ensureNewFields(this.data); store.save(this.data); this.showImportModal = false; this.flashSave(); } catch(err) { alert('Invalid JSON file: '+err.message); } }; reader.readAsText(file); },
-        resetData() { if (!confirm('Reset ALL data to the original dataset? This cannot be undone.')) return; if (!confirm('Are you absolutely sure? All your edits will be lost.')) return; store.clear(); this.data = migrateRawData(RAW_DATA); this.data.generalTasks = { galNA: [], adi: [], general: [], keshet: [] }; this.data.allocLabels = { col2: '2025-26', col3: '2026-27' }; store.save(this.data); this.flashSave(); }
+        resetData() { if (!confirm('Reset ALL data to the original dataset? This cannot be undone.')) return; if (!confirm('Are you absolutely sure? All your edits will be lost.')) return; store.clear(); this.data = migrateRawData(RAW_DATA); this.data.generalTasks = { galNA: [], adi: [], general: [], keshet: [] }; this.data.allocLabels = { col2: '2025-26', col3: '2026-27' }; store.save(this.data); this.flashSave(); },
+        refreshEvents() {
+            if (!confirm('This will refresh community events from the latest code update. Your manually added events will be kept. Continue?')) return;
+            let added = 0;
+            for (const fed of Object.values(this.data.federations)) {
+                const src = WEBSITE_DATA[fed.id];
+                if (!src || !src.communityEvents) continue;
+                if (!fed.communityEvents) fed.communityEvents = [];
+                const existingIds = new Set(fed.communityEvents.map(e => e.id));
+                for (const evt of src.communityEvents) {
+                    if (!existingIds.has(evt.id)) {
+                        fed.communityEvents.push(JSON.parse(JSON.stringify(evt)));
+                        added++;
+                    }
+                }
+            }
+            this.data.eventsLastUpdated = new Date().toISOString().split('T')[0];
+            this.autoSave();
+            alert('Events refreshed! ' + added + ' new event(s) added across all federations.');
+        }
     }));
 });
 </script>
