@@ -395,8 +395,21 @@
                                 <input x-model="fed.community.population" @input="autoSave()" class="mt-1 w-full bg-transparent border-b border-dashed border-gray-300 focus:border-brand-500 outline-none py-1" :placeholder="'Click to add'">
                             </div>
                             <div class="bg-gray-50 rounded-lg p-4">
-                                <label class="text-xs font-semibold text-gray-500 uppercase">Annual Budget</label>
+                                <div class="flex items-center justify-between">
+                                    <label class="text-xs font-semibold text-gray-500 uppercase">Annual Budget</label>
+                                    <button @click="if(!fed.community.budgetLines) fed.community.budgetLines=[]; fed.community.budgetLines.push(''); autoSave()" class="text-xs bg-gray-200 hover:bg-gray-300 text-gray-600 px-2 py-0.5 rounded transition no-print">+</button>
+                                </div>
                                 <input x-model="fed.community.annualBudget" @input="autoSave()" class="mt-1 w-full bg-transparent border-b border-dashed border-gray-300 focus:border-brand-500 outline-none py-1" :placeholder="'Click to add'">
+                                <template x-if="fed.community.budgetLines && fed.community.budgetLines.length > 0">
+                                    <div class="mt-1 space-y-1">
+                                        <template x-for="(line, idx) in fed.community.budgetLines" :key="idx">
+                                            <div class="flex items-center gap-1 group">
+                                                <input :value="line" @input="fed.community.budgetLines[idx]=$event.target.value; autoSave()" class="flex-1 bg-transparent border-b border-dashed border-gray-300 focus:border-brand-500 outline-none py-1 text-sm" placeholder="Add detail...">
+                                                <button @click="fed.community.budgetLines.splice(idx,1); autoSave()" class="text-red-400 hover:text-red-600 opacity-0 group-hover:opacity-100 transition no-print text-xs">&times;</button>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </template>
                             </div>
                             <div class="bg-gray-50 rounded-lg p-4">
                                 <label class="text-xs font-semibold text-gray-500 uppercase">Controls</label>
@@ -1417,6 +1430,7 @@ function ensureNewFields(data) {
         if (!fed.eventsLastUpdated) fed.eventsLastUpdated = '';
         // Ensure partnership field exists
         if (fed.community && fed.community.catchmentArea === undefined) fed.community.catchmentArea = null;
+        if (fed.community && !fed.community.budgetLines) fed.community.budgetLines = [];
         if (fed.community && fed.community.partnership === undefined) fed.community.partnership = null;
         // Ensure all visits have a documents array
         if (fed.visits) { for (const v of fed.visits) { if (!v.documents) v.documents = []; } }
@@ -1514,6 +1528,7 @@ document.addEventListener('alpine:init', () => {
             if ((fed.notes||'').toLowerCase().includes(term)) return true;
             const com = fed.community;
             if ([com.catchmentArea, com.population, com.annualBudget, com.controls, com.details, com.partnership].some(v => v && v.toLowerCase().includes(term))) return true;
+            if (com.budgetLines && com.budgetLines.some(l => l && l.toLowerCase().includes(term))) return true;
             if (fed.websiteInfo && fed.websiteInfo.mission && fed.websiteInfo.mission.toLowerCase().includes(term)) return true;
             if (fed.websiteInfo && fed.websiteInfo.programs && fed.websiteInfo.programs.some(p => p.toLowerCase().includes(term))) return true;
             if (fed.communityEvents && fed.communityEvents.some(e => (e.name+' '+e.description+' '+e.date).toLowerCase().includes(term))) return true;
@@ -1643,7 +1658,7 @@ document.addEventListener('alpine:init', () => {
                 summaryRows.push([fed.name, fed.people.length, (fed.tasks||[]).filter(t=>!t.done).length, fmtCur(this.sumAlloc(fed,'24_25')), fmtCur(this.sumAlloc(fed,'25_26')), fmtCur(this.sumAlloc(fed,'26_27')), fed.visits.length, (fed.communityEvents||[]).length]);
                 const rows = [];
                 rows.push(['=== ONGOING TASKS ===']); rows.push(['Task','Status','Created']); if (fed.tasks && fed.tasks.length > 0) { fed.tasks.forEach(t => rows.push([t.text, t.done ? 'Completed' : 'Open', t.createdAt ? new Date(t.createdAt).toLocaleDateString() : ''])); } rows.push([]);
-                rows.push(['=== COMMUNITY INFO ===']); rows.push(['Catchment Area', fed.community.catchmentArea||'']); rows.push(['Population', fed.community.population||'']); rows.push(['Annual Budget', fed.community.annualBudget||'']); rows.push(['Controls', fed.community.controls||'']); rows.push(['Partnership', fed.community.partnership||'']); rows.push(['Details', fed.community.details||'']); rows.push(['Summer Camps', fed.community.summerCamps||'']); rows.push([]);
+                rows.push(['=== COMMUNITY INFO ===']); rows.push(['Catchment Area', fed.community.catchmentArea||'']); rows.push(['Population', fed.community.population||'']); rows.push(['Annual Budget', fed.community.annualBudget||'']); if (fed.community.budgetLines) { fed.community.budgetLines.forEach(l => { if (l) rows.push(['', l]); }); } rows.push(['Controls', fed.community.controls||'']); rows.push(['Partnership', fed.community.partnership||'']); rows.push(['Details', fed.community.details||'']); rows.push(['Summer Camps', fed.community.summerCamps||'']); rows.push([]);
                 if (fed.websiteInfo) { rows.push(['=== WEBSITE INFO ===']); rows.push(['Website', fed.websiteInfo.website||'']); rows.push(['Address', fed.websiteInfo.address||'']); rows.push(['Phone', fed.websiteInfo.phone||'']); rows.push(['Email', fed.websiteInfo.email||'']); rows.push(['Mission', fed.websiteInfo.mission||'']); rows.push(['Charity Rating', fed.websiteInfo.charityRating||'']); rows.push(['Focus Areas', (fed.websiteInfo.focusAreas||[]).join('; ')]); rows.push(['Programs', (fed.websiteInfo.programs||[]).join('; ')]); rows.push(['Giving Options', (fed.websiteInfo.givingOptions||[]).join('; ')]); rows.push([]); }
                 rows.push(['=== KEY PEOPLE ===']); rows.push(['Name','Role','Category','Email','Phone']); fed.people.forEach(p => rows.push([p.name, p.role, p.category, p.email, p.phone])); rows.push([]);
                 rows.push(['=== ALLOCATIONS ===']); rows.push(['Program','2024-25',al.col2,al.col2+' Docs',al.col3,al.col3+' Docs','Notes']); fed.allocations.forEach(a => rows.push([a.program, a.amount_24_25||'', a.amount_25_26||'', (a.docs_25_26||[]).map(d=>d.name).join('; '), a.amount_26_27||'', (a.docs_26_27||[]).map(d=>d.name).join('; '), a.notes||''])); rows.push([]);
