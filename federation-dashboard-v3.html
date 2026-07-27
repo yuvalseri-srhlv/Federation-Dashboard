@@ -7,7 +7,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Fed Dashboard">
-    <title>NE Regional Director - Federation Dashboard</title>
+    <title>Federation Dashboard</title>
     <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIkZlZGVyYXRpb24gRGFzaGJvYXJkIiwKICAic2hvcnRfbmFtZSI6ICJGZWQgRGFzaGJvYXJkIiwKICAic3RhcnRfdXJsIjogIi4vZmVkZXJhdGlvbi1kYXNoYm9hcmQtdjMuaHRtbCIsCiAgImRpc3BsYXkiOiAic3RhbmRhbG9uZSIsCiAgImJhY2tncm91bmRfY29sb3IiOiAiIzFlM2M3MiIsCiAgInRoZW1lX2NvbG9yIjogIiMxZTNjNzIiLAogICJpY29ucyI6IFtdCn0=">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -59,12 +59,95 @@
 
 <div x-cloak x-data="dashboard" class="max-w-[1500px] mx-auto p-4 md:p-6">
 
+    <!-- SETUP WIZARD -->
+    <div x-show="showWizard" class="fixed inset-0 bg-gradient-to-br from-brand-600 to-brand-500 flex items-center justify-center z-[100] p-4" style="display:none">
+        <div class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-lg">
+
+            <!-- Step indicators -->
+            <div class="flex items-center justify-center gap-2 mb-8">
+                <template x-for="s in [1,2,3]" :key="s">
+                    <div class="flex items-center">
+                        <div :class="wizardStep >= s ? 'bg-brand-500 text-white' : 'bg-gray-200 text-gray-500'" class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition" x-text="s"></div>
+                        <div x-show="s < 3" :class="wizardStep > s ? 'bg-brand-500' : 'bg-gray-200'" class="w-8 h-1 rounded transition"></div>
+                    </div>
+                </template>
+            </div>
+
+            <!-- Step 1: Welcome & Profile -->
+            <div x-show="wizardStep === 1">
+                <h2 class="text-2xl font-bold text-brand-600 text-center mb-2">Welcome to the Federation Dashboard</h2>
+                <p class="text-gray-500 text-center mb-6">Let's set up your profile</p>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-600 mb-1">Your Name</label>
+                        <input x-model="wizardProfile.name" type="text" placeholder="e.g. Sarah Cohen" class="w-full border-2 border-gray-200 rounded-lg px-4 py-2 focus:border-brand-400 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-600 mb-1">Region</label>
+                        <input x-model="wizardProfile.region" type="text" placeholder="e.g. SE, Central, West" class="w-full border-2 border-gray-200 rounded-lg px-4 py-2 focus:border-brand-400 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-600 mb-1">Title <span class="text-gray-400 font-normal">(optional)</span></label>
+                        <input x-model="wizardProfile.title" type="text" placeholder="Regional Director" class="w-full border-2 border-gray-200 rounded-lg px-4 py-2 focus:border-brand-400 focus:outline-none">
+                    </div>
+                </div>
+                <button @click="if(!wizardProfile.name.trim()) return alert('Please enter your name'); if(!wizardProfile.region.trim()) return alert('Please enter your region'); wizardStep = 2" class="w-full mt-6 bg-brand-500 hover:bg-brand-600 text-white py-3 rounded-lg font-semibold transition">Next &rarr;</button>
+            </div>
+
+            <!-- Step 2: Add Federations -->
+            <div x-show="wizardStep === 2">
+                <h2 class="text-2xl font-bold text-brand-600 text-center mb-2">Add Your Federations</h2>
+                <p class="text-gray-500 text-center mb-6">Add the federations you manage</p>
+                <div class="flex gap-2 mb-4">
+                    <input x-model="wizardNewFedName" type="text" placeholder="Federation name" @keydown.enter.prevent="wizardAddFed()" class="flex-1 border-2 border-gray-200 rounded-lg px-4 py-2 focus:border-brand-400 focus:outline-none">
+                    <button @click="wizardAddFed()" class="bg-brand-500 hover:bg-brand-600 text-white px-4 py-2 rounded-lg font-medium transition">Add</button>
+                </div>
+                <div x-show="wizardFederations.length > 0" class="space-y-2 mb-4 max-h-48 overflow-y-auto">
+                    <template x-for="(fedName, idx) in wizardFederations" :key="idx">
+                        <div class="flex items-center justify-between bg-brand-50 rounded-lg px-4 py-2">
+                            <span class="font-medium text-brand-700" x-text="fedName"></span>
+                            <button @click="wizardRemoveFed(idx)" class="text-red-400 hover:text-red-600 text-lg font-bold">&times;</button>
+                        </div>
+                    </template>
+                </div>
+                <p x-show="wizardFederations.length === 0" class="text-gray-400 text-center text-sm py-4">No federations added yet</p>
+                <div class="flex gap-3 mt-4">
+                    <button @click="wizardStep = 1" class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 py-3 rounded-lg font-medium transition">&larr; Back</button>
+                    <button @click="if(wizardFederations.length === 0) return alert('Please add at least one federation'); wizardStep = 3" class="flex-1 bg-brand-500 hover:bg-brand-600 text-white py-3 rounded-lg font-semibold transition">Next &rarr;</button>
+                </div>
+            </div>
+
+            <!-- Step 3: Done -->
+            <div x-show="wizardStep === 3">
+                <div class="text-center mb-6">
+                    <div class="text-5xl mb-4">&#10003;</div>
+                    <h2 class="text-2xl font-bold text-brand-600 mb-2">You're All Set!</h2>
+                    <p class="text-gray-500">Your dashboard is ready with <strong x-text="wizardFederations.length"></strong> federation<span x-show="wizardFederations.length !== 1">s</span></p>
+                </div>
+                <div class="bg-gray-50 rounded-lg p-4 mb-6">
+                    <div class="text-sm text-gray-500 mb-1">Profile</div>
+                    <div class="font-semibold text-brand-700" x-text="wizardProfile.name"></div>
+                    <div class="text-sm text-gray-500" x-text="(wizardProfile.title || 'Regional Director') + ' &mdash; ' + wizardProfile.region + ' Region'"></div>
+                    <div class="text-sm text-gray-500 mt-2 mb-1">Federations</div>
+                    <template x-for="f in wizardFederations" :key="f">
+                        <div class="text-sm text-brand-600" x-text="'• ' + f"></div>
+                    </template>
+                </div>
+                <div class="flex gap-3">
+                    <button @click="wizardStep = 2" class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 py-3 rounded-lg font-medium transition">&larr; Back</button>
+                    <button @click="finishWizard()" class="flex-1 bg-green-500 hover:bg-green-600 text-white py-3 rounded-lg font-bold transition text-lg">Start Dashboard</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
     <!-- HEADER -->
     <header class="bg-white rounded-2xl shadow-lg p-6 md:p-8 mb-6">
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div>
-                <h1 class="text-2xl md:text-3xl font-bold text-brand-600">NE Regional Director Dashboard</h1>
-                <p class="text-gray-500 mt-1">Federation Management & Tracking System &mdash; Yuval Seri</p>
+                <h1 class="text-2xl md:text-3xl font-bold text-brand-600" x-text="(data && data.userRegion ? data.userRegion + ' ' : '') + 'Regional Director Dashboard'">Regional Director Dashboard</h1>
+                <p class="text-gray-500 mt-1">Federation Management &amp; Tracking System <span x-show="data && data.userName">&mdash; <span x-text="data ? data.userName : ''"></span></span></p>
                 <a href="jewish-community-map.html" class="text-brand-400 hover:text-brand-600 text-sm underline mt-1 inline-block no-print">🗺️ View Community Map</a>
             </div>
             <div class="flex flex-wrap gap-2 no-print">
@@ -1406,6 +1489,9 @@ function mergeLegacyStorage(data) {
 
 // Ensure backward compat: add websiteInfo/communityEvents/financials to saved data if missing
 function ensureNewFields(data) {
+    if (data.userName === undefined) data.userName = 'Yuval Seri';
+    if (data.userRegion === undefined) data.userRegion = 'NE';
+    if (data.userTitle === undefined) data.userTitle = 'Regional Director';
     for (const fed of Object.values(data.federations)) {
         const src = WEBSITE_DATA[fed.id];
         if (!fed.websiteInfo) { fed.websiteInfo = src ? src.websiteInfo : { website:'', address:'', phone:'', email:'', mission:'', focusAreas:[], programs:[], charityRating:'', givingOptions:[] }; }
@@ -1468,6 +1554,7 @@ function ensureNewFields(data) {
 document.addEventListener('alpine:init', () => {
     Alpine.data('dashboard', () => ({
         data: null, searchTerm: '', activeRegion: 'All', expanded: {}, sections: {}, saveIndicator: false,
+        showWizard: false, wizardStep: 1, wizardProfile: { name: '', region: '', title: '' }, wizardFederations: [], wizardNewFedName: '',
         showAddPersonModal: false, showEditPersonModal: false, showAddVisitModal: false, showAddAllocModal: false, showAddFedModal: false, showImportModal: false, showAddEventModal: false, showAddMissionModal: false, currentFedId: null,
         newPerson: { name:'', role:'', category:'Federation', email:'', phone:'' },
         editingPerson: { id:'', name:'', role:'', category:'Federation', email:'', phone:'' },
@@ -1486,7 +1573,7 @@ document.addEventListener('alpine:init', () => {
             try {
                 const saved = store.load();
                 if (saved && saved.federations) { this.data = saved; ensureNewFields(this.data); if (!this.data.generalTasks) this.data.generalTasks = { galNA: [], adi: [], general: [], keshet: [] }; if (!this.data.generalTasks.keshet) this.data.generalTasks.keshet = []; if (!this.data.allocLabels) this.data.allocLabels = { col2: '2025-26', col3: '2026-27' }; store.save(this.data); }
-                else { this.data = migrateRawData(RAW_DATA); this.data.generalTasks = { galNA: [], adi: [], general: [], keshet: [] }; this.data.allocLabels = { col2: '2025-26', col3: '2026-27' }; mergeLegacyStorage(this.data); store.save(this.data); }
+                else { this.showWizard = true; this.data = { _version: 2, _lastModified: new Date().toISOString(), federations: {}, userName: '', userRegion: '', userTitle: '', generalTasks: { galNA: [], adi: [], general: [], keshet: [] }, allocLabels: { col2: '2025-26', col3: '2026-27' } }; return; }
                 const firstId = this.allFederations[0]?.id;
                 if (firstId) this.expanded[firstId] = true;
             } catch(e) { console.error('Init error:', e); alert('Dashboard init error: ' + e.message + '. Try clicking Reset to fix.'); this.data = migrateRawData(RAW_DATA); this.data.generalTasks = { galNA: [], adi: [], general: [], keshet: [] }; this.data.allocLabels = { col2: '2025-26', col3: '2026-27' }; store.save(this.data); }
@@ -1653,7 +1740,7 @@ document.addEventListener('alpine:init', () => {
         exportToExcel() {
             const wb = XLSX.utils.book_new();
             const al = this.data.allocLabels || { col2:'2025-26', col3:'2026-27' };
-            const summaryRows = [['NE Regional Director - Federation Dashboard'],['Export Date: '+new Date().toLocaleDateString()],[],['Federation','People','Open Tasks','Alloc 24-25','Alloc '+al.col2,'Alloc '+al.col3,'Visits','Events']];
+            const summaryRows = [[(this.data.userRegion||'')+' Regional Director - Federation Dashboard'],['Export Date: '+new Date().toLocaleDateString()],[],['Federation','People','Open Tasks','Alloc 24-25','Alloc '+al.col2,'Alloc '+al.col3,'Visits','Events']];
             for (const fed of this.allFederations) {
                 summaryRows.push([fed.name, fed.people.length, (fed.tasks||[]).filter(t=>!t.done).length, fmtCur(this.sumAlloc(fed,'24_25')), fmtCur(this.sumAlloc(fed,'25_26')), fmtCur(this.sumAlloc(fed,'26_27')), fed.visits.length, (fed.communityEvents||[]).length]);
                 const rows = [];
@@ -1680,6 +1767,28 @@ document.addEventListener('alpine:init', () => {
         exportToJSON() { const blob = new Blob([JSON.stringify(this.data, null, 2)], {type:'application/json'}); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'federation-dashboard-backup-'+new Date().toISOString().split('T')[0]+'.json'; a.click(); },
         importFromJSON(event) { const file = event.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = (e) => { try { const imported = JSON.parse(e.target.result); if (!imported.federations) throw new Error('Invalid format'); if (!confirm('This will replace all current data. Continue?')) return; this.data = imported; ensureNewFields(this.data); store.save(this.data); this.showImportModal = false; this.flashSave(); } catch(err) { alert('Invalid JSON file: '+err.message); } }; reader.readAsText(file); },
         resetData() { if (!confirm('Reset ALL data to the original dataset? This cannot be undone.')) return; if (!confirm('Are you absolutely sure? All your edits will be lost.')) return; store.clear(); this.data = migrateRawData(RAW_DATA); this.data.generalTasks = { galNA: [], adi: [], general: [], keshet: [] }; this.data.allocLabels = { col2: '2025-26', col3: '2026-27' }; store.save(this.data); this.flashSave(); },
+
+        wizardAddFed() {
+            const name = this.wizardNewFedName.trim();
+            if (!name) return;
+            if (this.wizardFederations.some(f => f.toLowerCase() === name.toLowerCase())) return alert('Already added');
+            this.wizardFederations.push(name);
+            this.wizardNewFedName = '';
+        },
+        wizardRemoveFed(idx) { this.wizardFederations.splice(idx, 1); },
+        finishWizard() {
+            this.data.userName = this.wizardProfile.name.trim();
+            this.data.userRegion = this.wizardProfile.region.trim();
+            this.data.userTitle = this.wizardProfile.title.trim() || 'Regional Director';
+            for (const fedName of this.wizardFederations) {
+                const id = fedName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/-+$/, '');
+                this.data.federations[id] = { id, name: fedName, region: this.data.userRegion || '', community: { catchmentArea: null, population: null, annualBudget: null, controls: null, details: null, summerCamps: null, partnership: null, budgetLines: [] }, people: [], allocations: [], shlichut: [], jafiPrograms: [], opportunities: [], visits: [], tasks: [], missions: [], notes: '', websiteInfo: { website: '', address: '', phone: '', email: '', mission: '', focusAreas: [], programs: [], charityRating: '', givingOptions: [] }, communityEvents: [], eventsLastUpdated: '' };
+            }
+            store.save(this.data);
+            this.showWizard = false;
+            const firstId = this.allFederations[0]?.id;
+            if (firstId) this.expanded[firstId] = true;
+        },
         refreshEvents() {
             if (!confirm('This will refresh community events from the latest code update. Your manually added events will be kept. Continue?')) return;
             let added = 0;
