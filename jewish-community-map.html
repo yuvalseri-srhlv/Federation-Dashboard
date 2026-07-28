@@ -65,7 +65,7 @@
 <div x-cloak x-data="mapApp" class="flex h-screen w-screen">
 
     <!-- ==================== DESKTOP SIDEBAR ==================== -->
-    <aside class="hidden md:flex md:flex-col w-80 bg-white shadow-lg z-20 flex-shrink-0">
+    <aside class="hidden md:flex md:flex-col w-80 bg-white shadow-lg z-[1100] flex-shrink-0">
         <!-- Header -->
         <div class="bg-brand-600 text-white p-4">
             <h1 class="text-lg font-bold">Jewish Community Map</h1>
@@ -211,7 +211,7 @@
     <div x-show="sidebarOpen" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0"
          x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-200"
          x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
-         class="md:hidden fixed inset-0 z-50 bg-black/40" @click.self="sidebarOpen = false">
+         class="md:hidden fixed inset-0 z-[1200] bg-black/40" @click.self="sidebarOpen = false">
         <div x-transition:enter="transition ease-out duration-300" x-transition:enter-start="translate-y-full"
              x-transition:enter-end="translate-y-0" x-transition:leave="transition ease-in duration-200"
              x-transition:leave-start="translate-y-0" x-transition:leave-end="translate-y-full"
@@ -289,13 +289,13 @@
         <div id="map" class="w-full h-full"></div>
         <!-- Mobile FAB -->
         <button @click="sidebarOpen = !sidebarOpen"
-            class="md:hidden fixed bottom-6 left-6 z-40 bg-brand-600 hover:bg-brand-700 text-white w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition">
+            class="md:hidden fixed bottom-6 left-6 z-[1100] bg-brand-600 hover:bg-brand-700 text-white w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/></svg>
         </button>
     </div>
 
     <!-- ==================== ADD/EDIT MODAL ==================== -->
-    <div x-show="showModal" class="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 p-4" @click.self="showModal = false">
+    <div x-show="showModal" class="fixed inset-0 z-[1300] flex items-center justify-center bg-black/50 p-4" @click.self="showModal = false">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto p-6" @click.stop>
             <h2 class="text-xl font-bold text-brand-600 mb-4" x-text="editingId ? 'Edit Institution' : 'Add Institution'"></h2>
             <div class="space-y-3">
