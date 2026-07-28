@@ -1048,204 +1048,12 @@
 // =============================================
 // RAW DATA
 // =============================================
-const RAW_DATA = {
-  "The Associated - Baltimore": [
-    [null, "Israel Fellow - Hopkins University (currently not interested but maybe next year)", "Community", "100,000 approx (30% ultra-orthodox)", "Federation", "Andrew Cushnir", "President and CEO", "Core", "$ 2,013,048 ", "$ 1,862,396 ", "1 Shabi ", null, "June 6th 24", "Intoduction meeting as part of Chafifa with Sigal K"],
-    [null, null, "Annual budget ", "$90M approx ($30M Campaign+15M Agencies+ $60M gifts/endowments/income); Israel&Global: $6M ", null, "Ruth Miller", "Chief Planning Officer, Community Planning & Allocations", "Masa", "$ 120,000", "$ 80,000 ", "1 Ofek ", null, "Oct 1st 24", "Federation visit"],
-    [null, null, "Controls", "Foundations", null, "Mary Drey Haar", "Vice President, Community Planning & Allocations", "Youth Futures", "$10,000", "$10,000", "6 Shinshinim", null, "March 18th 24", "Jafi review for all professionals; Meeting with professionals; Meeting with Shlichim"],
-    [null, null, null, "18 Agencies - frd for all of them - including: Jewish education services (JES)- 36 institutions; 2 JCC (including Day camps, 1 Overnight Camp; Jewish connection network \u2013 900 engaged people, Jewish day schools, 5 Hillels, and more.", null, "Jason Horowitz", "Assistant Vice President, Israel and Global Initiatives", "P2G (Ashkelon)", "$ 245,000", " $268,000", null, null, "May 4th-7th 2025", "Federation visit; Richie Pearlston dinner; JPRO"],
-    [null, null, null, null, null, "Aviva Schwartz", "Manager, Israel and Global Initiatives", "Keren Or Emergency Loan Fund ", "$667,000", null, null, null, "Sep 9th 2025", "Fed visit; Shinshinim orientation"],
-    [null, null, null, null, null, "Michelle Ostroff", "Senior Vice President, Annual Campaign", "Odesa Partnership ", "$10,000", "$45,800", null, null, null, null],
-    [null, null, null, null, null, "Michelle Price", "Israel Travel Recruiter", "Music Classes Ashkelon", " $5,000", "$8,250", null, null, null, null],
-    [null, null, null, null, null, "Benny scholder", "mission director", "Programming for Ukrainians in Poland ", "$2,000", "$2,000", null, null, null, null],
-    [null, null, null, null, null, "Smadar Haika-Fox", "JES, superviser shsh", null, null, null, null, null, null, null],
-    [null, null, null, null, null, "Isaac Pretor", "I&O committee chairman ,Cabinet member", null, null, null, null, null, null, null],
-    [null, null, null, null, null, "Yossi Kelemer", "Liason for Ashkelon-Baltimore (Board member)", null, null, null, null, null, null, null],
-    [null, null, null, null, null, "Rabbi Aaron Levitt", "Executive Director, Jewish Educational Services (JES)", null, null, null, null, null, null, null],
-    [null, null, null, null, null, "Gabrielle Burger", "Senior Director, Jewish Experiences (Jewish Connection Network)", null, null, null, null, null, null, null],
-    [null, null, null, null, null, "David Speer", "Maryland/Israel Development Center's  Executive Director", null, null, null, null, null, null, null],
-    [null, null, null, null, null, "Debbie Dubin", "Senior Director of Major Gifts", "Emergency campaign", "$5,000,000", null, null, null, null, null],
-    [null, null, null, null, null, "Ami Nahshoni", "Director, Israel and overseas", null, null, null, null, null, null, null],
-    [null, null, null, null, null, "Michelle Gordon", "Executive Vice President and Acting Chief Development Officer"],
-    [null, null, null, null, null, "Howard Libit", "Executive Director, Baltimore Jewish Council (BJC/JCRC)"],
-    [null, null, null, null, "Israel Office", "Ittai Korinmann Weiss", "Managing director Israel office", null, null, null, null, null, null, null],
-    [null, null, null, null, "BOG - Jafi", "Linda Hurwitz", "BOG", null, null, null, null, null, null, null],
-    [null, null, null, null, null, "Bruce Shulk", "chairman of budget and finance BOG Jafi", null, null, null, null, null, null, null],
-    [null, null, null, null, "Lay Leaders", "Richie Pearlston", null, null, null, null, null, null, null, null],
-    [null, null, null, null, null, "P.J Pearlston", "Richi's son", null, null, null, null, null, null, null]
-  ],
-  "Philadelphia": [
-    ["250K - grants/Loan fund for Kiryat Shmona", null, "Community ", "5 counties, 250,000 approx. (20% low Social-Ec class)", "Federation", "Michael Balaban", "President & CEO", "Core", " $ 610,000", " $ 610,000", "1 Shabi (RooteOne - JCC)", "Shlichim B'madim", "June 4th 24", "Intoduction meeting as part of Chafifa with Sigal K"],
-    ["Federation's endowments - Funding for programs (Shlichut, YF, etc)", null, "Annual budget ", "$60-71M approx ($10-15M Campaign + $50-60M gifts/endowments/income )", null, "Carmen Adames ", "Executive Assistant to the President and CEO", "P2G (Netivot-Sdot Negev)", " $ 360,000", " $ 360,000", "2 Shinshinim (JCC)", null, "Sep 9th 24", "Check-in meeting with Fed's CEO, Michael Balaban"],
-    [null, null, "Controls", "JCRC", null, "Jeffrey Lasday ", "Senior Chief of External Affairs", "Youth Futures", "$66,450", null, null, null, "March 2025", "Check-in meeting with Fed's CEO, Michael Balaban"],
-    [null, null, null, "Jewish education support", null, "Kelly Romirowsky", "Chief Strategy & Impact Officer", "Campers2gether", " $125,000 (50)", null, null, null, "June 20th 2025", "Check-in meeting with Fed's CEO, Michael Balaban"],
-    [null, null, null, null, null, "Alix Caplan", "Director, Annual Campaign", "Marom", "$250,000", null, null, null, "Feb 11th 2026", "Check-in meeting with Fed's CEO, Michael Balaban"],
-    [null, null, null, null, null, "Sarah Bernstein Solomon", "Chief Development Officer", "Rising lion ", "$20,000 (Emergency)", null, null, null, null, null],
-    [null, null, null, null, null, "Jason Holtzman", "Chief of Jewish Community Relations Council (JCRC)", "Loan fund - Netivot-Sdot Negev", null, "$250,000", null, null, null, null],
-    [null, null, null, null, null, "Sarah Lefkowitz", "NextGen Director", "Israel Fellows (2)", null, "$75,000", null, null, null, null],
-    [null, null, null, null, null, "Susan lundy", "gift team (under alix)"],
-    [null, null, null, null, null, "Rabbi David Levin", "President, The Board of Rabbis of Greater Philadelphia"],
-    [null, null, null, null, null, "David Ainsman", "Presidant elect, Jewish federation of Grater Philadelphia"],
-    [null, null, null, null, "Federation - Israel office", "Tali Lidar", "I&O + Israel office (Israel)"],
-    [null, null, null, null, null, "Sapir Saad Itzhaki", "Co-Managing Director P2G"],
-    [null, null, null, null, null, "Einat Mazor Gilboa", "Co-Managing Director P2G"],
-    [null, null, null, null, null, "Eliav Didi", "Director - Marketing & Communications"],
-    [null, null, null, null, null, "Beth Razin", "Associate Director of Jewish Life"],
-    [null, null, null, null, null, "Tamar Brody", null],
-    [null, null, null, null, "BOG - Jafi", "Gail Nuri", "since 11/2024"],
-    [null, null, null, null, null, "Lauren Danneman", "since 11/2024"],
-    [null, null, null, null, "Cabinet", "Jonathan Korman", "Cabinet"],
-    [null, null, null, null, null, "Danielle Weiss", "Cabinet graduate, former Chair of Federation's JCRC"],
-    [null, null, null, null, "Lay Leaders", "Ben Schindler", "Co-chair"],
-    [null, null, null, null, null, "Stu goodman", "lay leader"],
-    [null, null, null, null, null, "Joseph Glyn", "chairman of Israel committee, lay leader"],
-    [null, null, null, null, "Community", "Alan scher", "CEO"],
-    [null, null, null, null, null, "Moria Simon-hazani", "\u05d0\u05d7\u05e8\u05d0\u05d9\u05ea \u05e2\u05dc \u05ea\u05d5\u05db\u05e0\u05d9\u05d5\u05ea \u05d9\u05e9\u05e8\u05d0\u05dc"],
-    [null, null, null, null, null, "Elana Rivel", "director"],
-    [null, null, null, null, null, "Marshal Leasack", "principal"],
-    [null, null, null, null, null, "Rabbi Michael Uram", "educational director"]
-  ],
-  "GMW": [
-    ["Approved the strategic plan for the next 5 years. Intend to invest more in Israel ", "Israel Fellow - federation Hillel", "Community ", "4.5 counties, 150,000 approx. (58,000 households, 30,000 people define themselves as non-jews)", "Federation", "Meredith Dragon", "Executive Vice President and CEO", "Core ", "$1,300,188", "$1,336,562", "1 Shabi", "Shlichim B'madim", "Aug 29th 24", "Introduction meeting with Fed professionals; Orientation day with the Shinshinim"],
-    ["The builders event - Soldier as a speaker", "Ofek Shlicut", "Annual budget ", "$30M approx ($22M Campaign + $8M gifts). Israel - 5-6M. JAFI/JDC Eq. (JDC - 1.3)", null, "Benjamin Mann", "Chief Planning Officer", "Youth Futures (Horfiesh)", "$ 25,000", "$ 25,000", "6 Shinshinim", null, "Feb 20th 25", "Jafi review for all professionals; Meeting with professionals; Meeting with Shlichim"],
-    [null, null, "Support", " 18 institutions (4 Jewish day schools, 3 JCCs, Synagogues, etc.)", null, "Rebecca Pollack", "VP, Development", "P2G (Ofakim, Merhavim, Arad, Horfeish, Rishol Lezion - Ramat Eliyahu, Kibbutz Erez)", "$391,000", "$491,000", null, null, "June 8th 25", "GMW teen groups event"],
-    [null, null, "Controls/Coordinated", "Foundation \u2013 independent, coordinate with the federation system. $700M of 800 funds. Last year allocated $53M, 20% for Israel", null, "Michal Werner", "Executive Director, Jewish Community Foundation of Greater MetroWest NJ (since Jul 2025)", "Campers2gether", "$ 225,000", null, null, null, "May 8th 25", "The builders event"],
-    [null, null, null, "Summer Camps: 3 JCC (Day Camps)+ 11 Overnight Camps (No", null, "Mart\u00edn Yaf\u00e9", "Director, Global Connections", "Rising Lion", " $ 700,000", null, null, null, "July-Aug 2025", "Summer Camps visits"],
-    [null, null, null, null, null, "Tracy Levin", "Director, One Happy Camper NJ", null, null, null, null, null, "Sep 8th 2025", "Fed visit; Shinshinim orientation"],
-    [null, null, null, null, null, "Avi Siegal", "Director of Teen Initiatives", null, null, null, null, null, "Nov 12th 2025", "Fed visit; Diller Conference"],
-    [null, null, null, null, null, "Amy Biloon", "Chief Community Engagement Officer", null, null, null, null, null, "Jan 12th 2026", "Peoplehood committee; Fed professionals meetings"],
-    [null, null, null, null, "BOG - Jafi", "Lori Klinghoffer ", "BOG", null, null, null, null, null, "Feb 2nd 2026", "Federation visit with Gal, including: Meredith (CEO), Benjamin (CPO), Martin (Israel and global), shlichim", "Opportunities to expand the Mishlachat - Martin; New GMW strategic plan that was just approved"],
-    [null, null, null, null, null, "Debbie Rovner", "BOG", null, null, null, null, null, "March 25th 2026", "Federation visit with Yehuda"],
-    [null, null, null, null, "Federation - Israel office", "Michal Tzur", "GMW representative in Israel"],
-    [null, null, null, null, null, "Ariel Erani", "P2G Director"],
-    [null, null, null, null, "Cabinet", "Ben Hoffer", "JCRC director and federation executive committee"],
-    [null, null, null, null, null, "Alexandra Feinstein", "Cabinet"]
-  ],
-  "NNJ": [
-    ["investing in mental health programs", "Israel Fellow - federation Hillel", "Community", " 3 counties,125,000 approx., 10-15,000 Israelis.", "Federation", "Jason Shames", "CEO and Executive Vice President", "Core ", "$ 470,600", "$ 470,600", null, "Shlichim B'madim", "Oct 30th 2024", "Introduction meeting with Fed professionals (include CEO, Jason Shamas)"],
-    [null, "Campers2gether", "Annual Budget ", "$15M approx. Highest allocation to JAFI.", null, "Sheryl Sarin ", "Senior Director- Community Planning and Allocations", "Youth Futures", "$100,000", "$100,000", null, null, "Oct 16th 2025", "Community visit (JCC, Synagogues)"],
-    [null, null, "Controls", "JCRC", null, "Rami Feinstein", "Director, Center for Israel Engagement", "Masa", "$50,000", "$50,000", null, null, "Nov 7th 2025", "Teachers Kenes - Aliya promotion"],
-    [null, null, null, "Hillel Unit", null, null, "Senior Planning and Allocations Associate", "Summer Camps in Kyiv", "$50,000", "$45,000", null, null, "March 26th 2026", "Federation visit with Yehuda"],
-    [null, null, "Summer Camps", "only social workers for 2 camps", null, "Ilana Berman", "JCRC Director", "Yesodot", "$16,000", "$16,000"],
-    [null, null, null, null, "Federation - Israel office", "Ravit Steinmetz", "Director of NNJ-Nahariya partnership"],
-    [null, null, null, null, "BOG - Jafi", "Roberta Abrams", "BOG"],
-    [null, null, null, null, "Community", "David Rosenberg", "Executive Director, New Jersey Jewish Business Alliance"]
-  ],
-  "CJP": [
-    ["Haifa-Boston Loan fund", "P2P", "Community", "250,000 approx. 30,000 Israelis", "Federation", "Marc Baker", "President and CEO", "Core ", "$275,000", "$375,000", "26-27: 2 Shinshinim (Shirat Hayam Cong, North shore), 1 Ofek (Rashi School, Beth Shalom)", null, "Dec 10th 24", "Introduction meeting (first time in person), including I&O and CEO, Marc Baker"],
-    [null, null, null, null, null, "Jennifer Weinstock", "Executive Vice President, Philanthropy"],
-    [null, null, null, null, null, "Jeremy Burton", "CEO, Jewish Community Relations Council (JCRC) of Greater Boston"],
-    [null, null, null, null, null, "Noam Bentov", "Associate Vice President, Israel and Global Jewry"],
-    ["Israel Office (Lior Krengel) - $4M for rebuilding Israel", "Increase the number of people going on journies to Israel", "Annual Budget ", "$58-60M approx", null, "Ariel Libhaber", "Senior Director, Global Partnerships ", "Boston-haifa Loan Fund", null, "$100,000", null, null, "Feb 3rd 25", "Prizma conference; Fed meetings"],
-    [null, null, "Controls", "CCA - Center for Combating Antisemitism", null, "Debbie Katz", "Principal Gifts Officer"],
-    [null, null, null, null, null, "Sara sousy", "schedule incharge for Marc Baker", null, null, null, null, null, "Dec 15-16th 2025", "Communities visits; Shlichim Conference; Fed meetings"],
-    [null, null, null, null, null, "Samantha Robinson", "Senior Manager", null, null, null, null, null, "March 23th 2026", "Federation visit with Yehuda"],
-    [null, null, null, null, "Federation - Israel office", "Oshrat Moyal", "Boston-Haifa Partnership"],
-    [null, null, null, null, null, "Lior Krengel", "Director, CJP Israel Office"],
-    [null, null, null, null, "BOG - Jafi", "Lisa Wallak", "BOG"]
-  ],
-  "Rochester": [
-    [null, "Israel Fellow - Roch - U", "Community", "18,000 approx ", null, "Leah Goldman", "Chief Planning & Program Officer", "Core ", "$ 618,689", "$618,689", null, "Shlichim B'madim", "March 26-27 2025", "Federation Visit"],
-    [null, "Ofek - JCC", "Annual Budget ", "$10M approx (Annual campaign: $4.5M); Israel total allocation: $1.1M (most to Jafi, about $200K to JDC)", null, "Michal Spivak", "Director of ShinShinim Programming", "P2G", "$175,000", "$175,000", null, null, "April 28 - May 2nd 2025", "Shlichim B'madim; Federation meeting; Shlichim visit"],
-    [null, null, null, null, null, "Gal Dimambro", "partnership", null, null, null, null, null, "Sep 10-11th 25", "Fed visit; Shinshinim orientation"],
-    [null, null, null, null, null, "Efrat Petel", "Director, Israel & Global Jewry", null, null, null, null, null, "Dec 17-18th 25", "visit with Gal - Fed meetings; Communities visits; shlichim visit"],
-    [null, null, null, null, null, "Jeanine Monachino", "Chief Financial & Operating Officer"],
-    [null, null, null, null, null, "Debbie Goldberg", "Chief Philanthropic Officer"],
-    [null, null, null, null, null, "Ted Axelrod", "Interim Chief of Staff"],
-    [null, null, null, null, null, "Monica Gebell", "Director of Jewish Community Relations & Executive Director, Levine Center to End Hate"],
-    [null, null, null, null, null, "Randy Schuster", "President (2025-2026)"],
-    [null, null, null, null, "Israel office", "Elinor Zur", "P2G Director"],
-    [null, null, null, null, "BOG - Jafi", "Rick Goldstien", "BOG"]
-  ]
-};
+const RAW_DATA = {};
 
 // =============================================
 // WEBSITE DATA (scraped from federation websites Jul 15, 2026)
 // =============================================
-const WEBSITE_DATA = {
-    baltimore: {
-        websiteInfo: { website: "https://www.associated.org", address: "5700 Park Heights Avenue, Baltimore, MD 21215", phone: "410-727-4828", email: "information@associated.org", mission: "The Associated builds Jewish life in Baltimore, Israel and globally, helping seniors, families, the hungry, and frail to live their best lives. No one should be left behind.", focusAreas: ["Care for One Another","Combat Antisemitism","Shape Jewish Journeys","Connect to Jews Worldwide"], programs: ["Financial Wellness & Housing Support","Mental Health Counseling & Workshops","Disability Inclusion & Job Readiness","AgeWell Baltimore","Community Safety & Security","Campus Hillels (5 area Hillels)","Jewish Camps & Day Schools","Baltimore-Ashkelon Partnership","Baltimore-Odesa Partnership","Jewish Museum of Maryland","Hebrew Free Loan"], charityRating: "4-star Charity Navigator (90% to programs)", givingOptions: ["Annual Campaign","Monthly Giving","Planned Giving","Donor-Advised Funds","Israel Bonds","Stock Donations","IRA Distributions"], financials: { fiscalYear:"7.1.2024 – 6.30.2025", totalRevenue:"$49.4M", totalExpenses:"$58.7M", totalAssets:"$42.9M", netAssets:"$18.9M", revenueBreakdown:[{item:"Contributions",amount:"TBD",pct:""},{item:"Program Services",amount:"TBD",pct:""},{item:"Investment & Other",amount:"TBD",pct:""}], keyInvestments:["Israel & Global: ~$6M annually","18 Network Partner Agencies","Jewish Education Services (36 institutions)","5 Campus Hillels","Community Safety & Security","Mental Health (28% increase in sessions)"], campaignNotes:"FY2025: Revenue declined to $49.4M (from $54.1M in FY2024). Net loss of ~$9.3M. Total assets declined to $42.9M. Annual Campaign priorities: vulnerable populations, Jewish education, combating antisemitism, Ashkelon & Odesa partnerships." } },
-        communityEvents: [
-            { id:"balt-e-025", name:"When Your Loved One Has Dementia", date:"Jul 15, 2026", time:"10:00 AM - 11:30 AM", location:"TBD", cost:"Free", description:"Support session for caregivers of loved ones with dementia", category:"Community Service" },
-            { id:"balt-e-026", name:"Network Book Club with Jewish Library of Baltimore", date:"Jul 16, 2026", time:"1:00 PM - 2:00 PM", location:"TBD", cost:"$10", description:"Monthly book club in partnership with the Jewish Library of Baltimore", category:"Education" },
-            { id:"balt-e-027", name:"Shabbat with YAD", date:"Jul 17, 2026", time:"7:00 PM - 10:00 PM", location:"TBD", cost:"Free", description:"Shabbat celebration for young adults in their 20s and 30s", category:"Holiday/Cultural" },
-            { id:"balt-e-028", name:"Courageous Conversations: Coffee and Chat with Chaya", date:"Jul 21, 2026", time:"12:00 PM - 1:00 PM", location:"TBD", cost:"Free", description:"Women's conversation series over coffee", category:"Education" },
-            { id:"balt-e-029", name:"JCS Memory Cafes", date:"Jul 21, 2026", time:"2:00 PM - 3:00 PM", location:"TBD", cost:"Free", description:"Social gathering for those affected by memory loss and their caregivers", category:"Community Service" },
-            { id:"balt-e-030", name:"Community Helper Story Time with Teacher Lyn Traub", date:"Jul 21, 2026", time:"4:30 PM - 5:30 PM", location:"TBD", cost:"Free", description:"Story time event for families", category:"Youth/Family" },
-            { id:"balt-e-031", name:"Tisha B'Av at Beth El Congregation", date:"Jul 22-23, 2026", time:"TBD", location:"Beth El Congregation of Baltimore", cost:"$18", description:"Tisha B'Av observance and programming", category:"Holiday/Cultural" },
-            { id:"balt-e-032", name:"Community Helper Story Time with Veterinarian Heather Schwedt", date:"Jul 28, 2026", time:"4:30 PM - 5:30 PM", location:"TBD", cost:"Free", description:"Story time with a veterinarian for families", category:"Youth/Family" },
-            { id:"balt-e-033", name:"Hearts & Crafts with YAD", date:"Jul 28, 2026", time:"5:30 PM - 7:00 PM", location:"TBD", cost:"Free", description:"Crafts evening for young adults in their 20s and 30s", category:"Holiday/Cultural" },
-            { id:"balt-e-034", name:"Baltimore Jewish Film Festival: The Blond Boy from the Casbah", date:"Jul 28, 2026", time:"7:00 PM - 9:00 PM", location:"TBD", cost:"$22", description:"Film screening as part of the Baltimore Jewish Film Festival", category:"Holiday/Cultural" },
-            { id:"balt-e-035", name:"Emotional Freedom Technique for Clinical Practice", date:"Jul 29, 2026", time:"12:00 PM - 2:00 PM", location:"TBD", cost:"Free", description:"Introduction to EFT for professionals", category:"Education" },
-            { id:"balt-e-036", name:"Dinner, Diversity and Dialogue", date:"Jul 29, 2026", time:"5:30 PM - 8:00 PM", location:"TBD", cost:"Free", description:"Evening of diverse conversation for young adults", category:"Education" },
-            { id:"balt-e-037", name:"Aloha Ahava", date:"Jul 29, 2026", time:"7:30 PM - 10:00 PM", location:"TBD", cost:"$18", description:"Social event for young adults in their 20s and 30s", category:"Holiday/Cultural" },
-            { id:"balt-e-038", name:"Books and Bites: Writing, Motherhood and Second Chances", date:"Jul 30, 2026", time:"12:00 PM - 1:00 PM", location:"TBD", cost:"Free", description:"Women's book discussion on writing and motherhood", category:"Education" },
-            { id:"balt-e-039", name:"Tot Shabbat", date:"Aug 1, 2026", time:"11:00 AM", location:"TBD", cost:"Free", description:"Shabbat celebration for toddlers and families", category:"Youth/Family" },
-            { id:"balt-e-040", name:"August Mitzvah Mutts", date:"Aug 4, 2026", time:"4:30 PM - 6:30 PM", location:"TBD", cost:"Free", description:"Volunteering event with animals", category:"Community Service" },
-            { id:"balt-e-041", name:"Holocaust Educators' Institute: Aftermath of the Holocaust", date:"Aug 5-7, 2026", time:"All Day", location:"TBD", cost:"$25", description:"Liberation, justice and the struggles to survive and rebuild — educator training", category:"Education" },
-            { id:"balt-e-042", name:"Living with Parkinson's Disease", date:"Aug 11, 2026", time:"2:00 PM - 3:00 PM", location:"Zoom", cost:"Free", description:"Monthly support group addressing disease management", category:"Community Service" },
-            { id:"balt-e-043", name:"2027 Annual Campaign Leadership Summit & Kickoff", date:"Sep 2026", time:"TBD", location:"The Associated HQ, 5700 Park Heights Ave", cost:"TBD", description:"First-of-its-kind in-person summit bringing together community leaders to launch the 2027 Annual Campaign and set priorities for the year ahead", category:"Fundraising" },
-            { id:"balt-e-044", name:"Hadassah Greater Baltimore Major Gifts Event", date:"Oct 7, 2026", time:"6:30 PM - 9:00 PM", location:"Private Home (TBD)", cost:"Free", description:"Exclusive dessert reception for Major Gift and Keeper Donors. Speaker: Ellen Finkelstein, CEO of Hadassah National", category:"Fundraising" },
-            { id:"balt-e-045", name:"The Associated's 2027 Annual Meeting", date:"Jun 16, 2027", time:"5:30 PM - 7:00 PM", location:"The Associated HQ, 5700 Park Heights Ave", cost:"Free", description:"Annual gathering reflecting on the year's impact in Baltimore, Israel and around the world", category:"Board/Governance" }
-        ]
-    },
-    philadelphia: {
-        websiteInfo: { website: "https://www.jewishphilly.org", address: "Two Commerce Square, 2001 Market Street, Suite 2300, Philadelphia, PA 19103", phone: "215-832-0500", email: "info@jewishphilly.org", mission: "The Jewish Federation of Greater Philadelphia is the hub of the region's many diverse Jewish communities. We build and sustain a strong, vibrant Jewish world every day by convening the community, encouraging generosity, and making grants to meet critical needs.", focusAreas: ["Accessible","Compassionate","Efficient","Inclusive","Informed","Responsive","Strong"], programs: ["Mitzvah Food Program","Teen Programs","Jewish Camping Scholarships","Holocaust Education","Partnership2Gether (Netivot-Sdot Negev)","Israel Emergency Response","JPRO","Neighborhood Programming","Missions/Travel Programs","Disability Inclusion"], charityRating: "4-star Charity Navigator", givingOptions: ["Monthly Donations","Donor-Advised Funds","Tribute E-Cards","Giving Societies","Vehicle Donations"], financials: { fiscalYear:"9.1.2023 – 8.31.2024", totalRevenue:"$73.0M", totalExpenses:"$54.8M", totalAssets:"$476.4M", netAssets:"$392.8M", revenueBreakdown:[{item:"Contributions",amount:"$53.5M",pct:"73%"},{item:"Investment Income",amount:"$8.8M",pct:"12%"},{item:"Sales of Assets",amount:"$9.5M",pct:"13%"},{item:"Other",amount:"$2.1M",pct:"3%"}], keyInvestments:["FY2026 Community Investment: $59.5M total (local, Israel & global)","Jewish Community Fund (JCF): $7.2M+ in grants","Israel Emergency: $16.5M+ raised; $15.3M+ committed","JFRE Capital Projects: $645K in FY2026","Camp Scholarships, Israel Trips, Mitzvah Food Program"], campaignNotes:"FY2026 committed investment exceeds $59.5M. Israel emergency response focused on P2G partner regions Sdot Negev and Netivot." } },
-        communityEvents: [
-            { id:"phil-e-013", name:"125 Shabbat Gatherings", date:"Throughout July 2026", time:"Flexible", location:"Your home", cost:"Free", description:"Celebrate Federation's 125th anniversary by hosting Shabbat. Free kits with candles, matches, and conversation starters delivered to you.", category:"Holiday/Cultural" },
-            { id:"phil-e-014", name:"Jewish America 250", date:"Jul 26, 2026", time:"4:00 PM - 9:30 PM", location:"Congregation Mikveh Israel", cost:"TBD", description:"Honoring the people, traditions and stories that have shaped Jewish life in America", category:"Holiday/Cultural" },
-            { id:"phil-e-015", name:"Women's Philanthropy Game Day", date:"Jul 30, 2026", time:"11:30 AM - 3:30 PM", location:"Linwood Country Club", cost:"TBD", description:"Mahjong, canasta, and networking. Attendees bring their own game sets.", category:"Community Service" },
-            { id:"phil-e-016", name:"Shore Event: Coexistence & Security", date:"Aug 6, 2026", time:"6:30 PM", location:"Atlantic City Country Club", cost:"TBD", description:"Speakers Loay Alshareef (coexistence advocate) and Dr. Casey Babb on antisemitism and global security", category:"Education" },
-            { id:"phil-e-017", name:"Bronstein Seminar for Professionals", date:"Sep 9, 2026", time:"8:00 AM - 10:00 AM", location:"Ballroom at the Ben", cost:"TBD", description:"Estate planning attorneys present on SLATS: ethical, practical, and tax considerations", category:"Education" }
-        ]
-    },
-    gmw: {
-        websiteInfo: { website: "https://www.jfedgmw.org", address: "901 Route 10, Whippany, NJ 07981", phone: "973-929-3066", email: "", mission: "The Jewish Federation of Greater MetroWest NJ stands at the center of a network of 27 local and 4 overseas partner agencies. Established in 1923 and celebrating over 100 years of service, it is the largest Jewish philanthropy in NJ and the 8th-largest federation in the US.", focusAreas: ["Care for People in Need","Build Jewish Life","Israel & Global Connections","Youth & Family Engagement"], programs: ["Greater MetroWest Day School Initiative","Jewish Community Foundation ($700M, 800 funds)","CampFest","IsraelNow Trip (8th graders)","One Happy Camper NJ","Borinsky Young Leadership Program","Women's Philanthropy","Teen Initiatives","Summer Camps (3 JCC Day + 11 Overnight)"], charityRating: "", givingOptions: ["Annual Campaign","Foundation Grants ($40M+ in 2024)"], financials: { fiscalYear:"7.1.2024 – 6.30.2025", totalRevenue:"~$35M (campaign + supplemental)", totalExpenses:"", totalAssets:"", netAssets:"", revenueBreakdown:[{item:"Annual Campaign",amount:"~$22M",pct:""},{item:"Supplemental Gifts",amount:"~$8M",pct:""},{item:"Israel & Global Allocation",amount:"$5-6M",pct:""}], keyInvestments:["Largest Jewish philanthropy in NJ (8th nationally)","Jewish Community Foundation: $700M in 800 funds; $53M allocated last year; 20% to Israel","27 local partner agencies + 4 overseas","Day School Initiative","6 P2G partner communities (Israel + Ukraine)","New 5-year strategic plan approved - increased Israel investment"], campaignNotes:"Annual campaign + supplemental giving totals ~$35M. Foundation allocated $40M+ in grants in 2024." } },
-        communityEvents: [
-            { id:"gmw-e-009", name:"LGBTQ+ Jewish Community Gathering", date:"Jul 13, 2026", time:"TBD", location:"TBD", cost:"Free", description:"Gathering for LGBTQ+ Jewish community members", category:"Community Service" },
-            { id:"gmw-e-010", name:"Summer Family Fun Event", date:"Jul 2026", time:"TBD", location:"TBD", cost:"TBD", description:"Family summer fun with ice cream bar, camp-inspired crafts, ninja challenge course, games and surprises", category:"Youth/Family" },
-            { id:"gmw-e-011", name:"Summer Tour Day: Surprise Lake Camp", date:"Summer 2026", time:"TBD", location:"Surprise Lake Camp, Cold Spring, NY", cost:"Free", description:"Tour day at Surprise Lake Camp for prospective families", category:"Youth/Family" },
-            { id:"gmw-e-012", name:"Our Little Lions (Caregiver and Me)", date:"Sep 10, 2026", time:"TBD", location:"Gottesman RTW Academy", cost:"TBD", description:"Caregiver and Me classes return with a special bubble show", category:"Youth/Family" }
-        ]
-    },
-    nnj: {
-        websiteInfo: { website: "https://jfnnj.org", address: "50 Eisenhower Drive, Paramus, NJ 07652", phone: "201-820-3900", email: "", mission: "JFNNJ brings people and resources together to meet the most urgent Jewish communal needs in Northern New Jersey, Israel and around the world. Serving Bergen, Hudson, and parts of Passaic Counties.", focusAreas: ["Community Planning & Allocations","Israel Engagement","Synagogue Leadership Development","Jewish Day Schools & Hillel Support"], programs: ["Center for Israel Engagement","Synagogue Leadership Labs","Jewish Day Schools Support","Hillel Programs","Special Needs Support Groups","Neil Klatskin Summer Camps","JCRC Advocacy"], charityRating: "", givingOptions: ["Annual Campaign"], financials: { fiscalYear:"7.1.2024 – 6.30.2025", totalRevenue:"$41.0M", totalExpenses:"$20.5M", totalAssets:"$103.7M", netAssets:"$77.7M", revenueBreakdown:[{item:"Contributions",amount:"TBD",pct:""},{item:"Sales of Assets",amount:"TBD",pct:""},{item:"Investment Income",amount:"TBD",pct:""},{item:"Program Services",amount:"TBD",pct:""}], keyInvestments:["Highest JAFI allocation proportionally among NE federations","Jewish Day Schools & Hillel support","Israel Engagement Center","Mental health programs investment","JCRC advocacy","Neil Klatskin Summer Camps"], campaignNotes:"FY2025: Revenue doubled to $41.0M (from $20.3M in FY2024). Total assets grew to $103.7M. Net assets up to $77.7M. Highest proportional allocation to JAFI among NE federations." } },
-        communityEvents: [
-            { id:"nnj-e-006", name:"Sharsheret NJ Summer BBQ", date:"Jul 15, 2026", time:"6:00 PM - 10:00 PM", location:"TBD", cost:"TBD", description:"Community summer BBQ event", category:"Community Service" },
-            { id:"nnj-e-007", name:"AIPAC 9 Days BBQ", date:"Jul 16, 2026", time:"TBD", location:"TBD", cost:"TBD", description:"BBQ event during Nine Days period", category:"Community Service" },
-            { id:"nnj-e-008", name:"Yad Leah Nine Days Packing Program", date:"Jul 19, 2026", time:"10:30 AM - 12:00 PM", location:"TBD", cost:"Free", description:"Volunteer packing initiative during Nine Days", category:"Community Service" },
-            { id:"nnj-e-009", name:"PJ Library Bookmobile", date:"Jul 19, 2026", time:"1:00 PM - 5:00 PM", location:"Huyler Park", cost:"Free", description:"Free mobile library for children's books", category:"Youth/Family" },
-            { id:"nnj-e-010", name:"Kaplen JCC: Play Fore! The Kids", date:"Jul 20, 2026", time:"9:00 AM - 9:00 PM", location:"Montammy Golf Club", cost:"TBD", description:"Golf, tennis, and games fundraiser classic", category:"Fundraising" },
-            { id:"nnj-e-011", name:"Our Family First Guest Speaker: Rabbi Schacter", date:"Jul 20, 2026", time:"7:00 PM - 9:00 PM", location:"Congregation Rinat Yisrael, 389 West Englewood Ave", cost:"TBD", description:"Rabbi Jacob J. Schacter discussing IDF support organization", category:"Israel/Global" },
-            { id:"nnj-e-012", name:"Shabbos in a Box (Chesed 24/7)", date:"Jul 21, 2026", time:"7:00 PM - 9:30 PM", location:"TBD", cost:"TBD", description:"Chesed 24/7 fundraiser and awareness event", category:"Fundraising" },
-            { id:"nnj-e-013", name:"Yavneh Academy Summer Golf Outing", date:"Jul 27, 2026", time:"All Day", location:"TBD", cost:"TBD", description:"Summer golf outing benefiting Yavneh Academy", category:"Fundraising" },
-            { id:"nnj-e-014", name:"The Moriah School Summer Outing", date:"Jul 27, 2026", time:"All Day", location:"TBD", cost:"TBD", description:"Summer outing benefiting The Moriah School", category:"Fundraising" },
-            { id:"nnj-e-015", name:"Camp Sprout Lake Rookie Day", date:"Aug 2, 2026", time:"10:00 AM - 4:00 PM", location:"Camp Sprout Lake", cost:"TBD", description:"Full day camp experience for rising 1st-4th graders", category:"Youth/Family" },
-            { id:"nnj-e-016", name:"Kaplen JCC: Kidchella", date:"Aug 5, 2026", time:"5:15 PM - 8:15 PM", location:"Kaplen JCC on the Palisades, 411 E. Clinton St, Tenafly, NJ", cost:"TBD", description:"Family entertainment with rides, food trucks, and live music", category:"Youth/Family" }
-        ]
-    },
-    cjp: {
-        websiteInfo: { website: "https://www.cjp.org", address: "Boston, MA", phone: "", email: "", mission: "CJP has been an act of hope for 130 years, working to strengthen the Jewish community in Greater Boston, Israel, and around the world through three core commitments.", focusAreas: ["Care for the Most Vulnerable","Broaden & Deepen Jewish Engagement","Build Knowledge & Connection with Israel"], programs: ["Communal Security Initiative (250+ orgs, $1.5M+ grants)","Center for Combating Antisemitism","Anti-Poverty Initiative (CJP Warmline)","Mental Health Initiatives","Campus Initiatives (17,000 young adults)","One Happy Camper Grants ($750K+, 400+ campers)","Jewish Day Schools Support","Arts & Culture Initiative ($75K grants)","JewishBoston.com Community Platform","Israel Emergency Fund ($59M raised since Oct 2023)","New England Holocaust Memorial"], charityRating: "", givingOptions: ["Annual Donations","Gifts of Stock","Donor-Advised Funds","Endowment & Legacy Giving","Matching Gifts"], financials: { fiscalYear:"7.1.2024 – 6.30.2025", totalRevenue:"$200M+ annually (under Marc Baker)", totalExpenses:"", totalAssets:"$2.4B (managed philanthropic assets)", netAssets:"", revenueBreakdown:[{item:"Annual Campaign Support",amount:"$200M+ over 4 years",pct:""},{item:"Israel Emergency Fund (since Oct 2023)",amount:"$59M raised",pct:""},{item:"IEF Deployed (as of Sep 2024)",amount:"$41M (72 grants, 51 partners)",pct:""}], keyInvestments:["Communal Security: $1.5M+ grants to 250+ orgs","One Happy Camper: $750K+ (400+ campers)","Arts & Culture: $75K grants + $12K fellowships","Campus Initiatives: 17,000 young adults engaged","Israel Office (Lior Krengel): $4M for rebuilding Israel","CCA - Center for Combating Antisemitism"], campaignNotes:"MA's largest nonprofit. $2.4B in managed assets. Israel Emergency Fund: $59M raised from 6,700 donors. Co-chairs: Matthew Sidman (2025 & 2026)." } },
-        communityEvents: [
-            { id:"cjp-e-005", name:"Israel Journey for Teens (CJP/BBYO)", date:"Jul 7-28, 2026", time:"All Day", location:"Israel", cost:"$600 (with CJP & RootOne subsidies)", description:"3-week Israel experience for Jewish teens grades 9-12 from Greater Boston", category:"Israel/Global" },
-            { id:"cjp-e-006", name:"Welcome Baby Playground Meetup", date:"Jul 26, 2026", time:"9:00 AM - 10:00 AM", location:"JCC Greater Boston", cost:"Free", description:"Playground meetup for families with new babies", category:"Youth/Family" },
-            { id:"cjp-e-007", name:"Delicatessens: A Cultural Evening", date:"Jul 30, 2026", time:"6:00 PM - 9:00 PM", location:"Vilna Shul, Boston", cost:"TBD", description:"Evening celebrating the culture and history of delicatessens", category:"Holiday/Cultural" },
-            { id:"cjp-e-008", name:"JCC Maccabi Games 2026", date:"Aug 2, 2026", time:"8:00 AM - 8:00 PM", location:"JCC Greater Boston", cost:"TBD", description:"Annual JCC Maccabi Games athletic competition for Jewish youth", category:"Youth/Family" },
-            { id:"cjp-e-009", name:"JCC Swim Events", date:"Aug 29-30, 2026", time:"9:00 AM - 2:00 PM", location:"Pool Deck, Leventhal-Sidman JCC", cost:"TBD", description:"Swimming events for ages 2-18", category:"Youth/Family" },
-            { id:"cjp-e-010", name:"2027 Annual Campaign Launch", date:"Jul 14, 2026", time:"TBD", location:"TBD", cost:"TBD", description:"Launch of CJP's 2027 Annual Campaign. Co-chairs: Michelle Black (2nd year) & Jeffrey Wolk (new). Focus: Jewish joy, connection and meaning.", category:"Fundraising" }
-        ]
-    },
-    rochester: {
-        websiteInfo: { website: "https://www.jewishrochester.org", address: "255 East Avenue, Suite 201, Rochester, NY 14604", phone: "585-461-0490", email: "Info@jewishrochester.org", mission: "We build and protect a strong Jewish future in Rochester, Israel and around the globe. The Federation has been a cornerstone of Jewish life in the region for nearly a century.", focusAreas: ["Philanthropy","Volunteer Leadership","Communal Responsibility","Israel & Global Connections"], programs: ["Center for Holocaust Awareness and Information (CHAI)","JCRC","Partnership2Gether","PJ Library Programs","Jewish TeensROC","Women's Philanthropy","Young Leadership","IGNITE! Community Impact Grant","ROCStrong Campaign","Levine Center to End Hate","Camp & Israel Travel Scholarships"], charityRating: "", givingOptions: ["2026 Annual Campaign","ROCStrong Campaign","Foundation Legacy Giving"], financials: { fiscalYear:"7.1.2024 – 6.30.2025", totalRevenue:"$10.1M", totalExpenses:"$12.4M", totalAssets:"$52.8M", netAssets:"$44.9M", revenueBreakdown:[{item:"Contributions",amount:"TBD",pct:""},{item:"Investment Income",amount:"TBD",pct:""},{item:"Other Revenue",amount:"TBD",pct:""}], keyInvestments:["Annual Campaign: $4.5M","Israel total allocation: $1.1M (most to JAFI, ~$200K to JDC)","CHAI - Holocaust Education","P2G Partnership","IGNITE! Community Impact Grants","ROCStrong Campaign","Camp & Israel Travel Scholarships"], campaignNotes:"FY2025: Revenue declined to $10.1M (from $16.7M in FY2024). Net loss of ~$2.3M. Total liabilities: $7.9M. Net assets grew slightly to $44.9M." } },
-        communityEvents: [
-            { id:"roch-e-011", name:"Mission Trip to Israel", date:"Jul 1-9, 2026", time:"All Day", location:"Jerusalem, Tel Aviv, Modi'in", cost:"TBD", description:"Spiritual and educational mission trip to Israel", category:"Israel/Global" },
-            { id:"roch-e-012", name:"JSplash 2026: Monday Night Pool Parties", date:"Jul 6, 13, 20, 27, 2026", time:"4:00 PM", location:"TBD", cost:"TBD", description:"Weekly summer pool party programming for families", category:"Youth/Family" },
-            { id:"roch-e-013", name:"Sensory Wednesday P(J) at the Splash Pad", date:"Jul 8, 2026", time:"9:30 AM", location:"Splash Pad", cost:"Free", description:"Sensory-friendly water play for families with PJ Library", category:"Youth/Family" },
-            { id:"roch-e-014", name:"Foam and Bubble Party (PJ Library)", date:"Jul 16, 2026", time:"TBD", location:"TBD", cost:"Free", description:"PJ Library event featuring foam and bubbles for families", category:"Youth/Family" },
-            { id:"roch-e-015", name:"Family Movie: Hoppers (Disney/Pixar)", date:"Jul 29, 2026", time:"TBD", location:"TBD", cost:"TBD", description:"Family film screening — Disney and Pixar, rated PG", category:"Youth/Family" }
-        ]
-    }
-};
+const WEBSITE_DATA = {};
 
 // =============================================
 // UTILITIES
@@ -1260,101 +1068,14 @@ function normCat(raw) { if (!raw) return 'Federation'; const l = raw.toLowerCase
 // PEOPLE CORRECTIONS (verified from federation websites Feb 2026)
 // =============================================
 // Name corrections: oldName -> newName
-const NAME_CORRECTIONS = {
-    "Andrew Kushnir": "Andrew Cushnir",
-    "Aharon Levitt": "Rabbi Aaron Levitt",
-    "Sara Salomon": "Sarah Bernstein Solomon",
-    "Sara Lefkowits": "Sarah Lefkowitz",
-    "Amy Bilun": "Amy Biloon",
-    "Lior Krangel": "Lior Krengel",
-    "Randy": "Randy Schuster"
-};
+const NAME_CORRECTIONS = {};
 // Title corrections: name -> correct title
-const TITLE_CORRECTIONS = {
-    "Andrew Cushnir": "President and CEO",
-    "Ruth Miller": "Chief Planning Officer, Community Planning & Allocations",
-    "Michelle Ostroff": "Senior Vice President, Annual Campaign",
-    "Rabbi Aaron Levitt": "Executive Director, Jewish Educational Services (JES)",
-    "Gabrielle Burger": "Senior Director, Jewish Experiences (Jewish Connection Network)",
-    "Michael Balaban": "President & CEO",
-    "Kelly Romirowsky": "Chief Strategy & Impact Officer",
-    "Sarah Bernstein Solomon": "Chief Development Officer",
-    "Jason Holtzman": "Chief of Jewish Community Relations Council (JCRC)",
-    "Sarah Lefkowitz": "NextGen Director",
-    "Meredith Dragon": "Executive Vice President and CEO",
-    "Rebecca Pollack": "VP, Development",
-    "Michal Werner": "Executive Director, Jewish Community Foundation of Greater MetroWest NJ (since Jul 2025)",
-    "Tracy Levin": "Director, One Happy Camper NJ",
-    "Amy Biloon": "Chief Community Engagement Officer",
-    "Jason Shames": "CEO and Executive Vice President",
-    "Rami Feinstein": "Director, Center for Israel Engagement",
-    "Debbie Katz": "Principal Gifts Officer",
-    "Lior Krengel": "Director, CJP Israel Office",
-    "Leah Goldman": "Chief Planning & Program Officer",
-    "Michal Spivak": "Director of ShinShinim Programming",
-    "Efrat Petel": "Director, Israel & Global Jewry",
-    "Randy Schuster": "President (2025-2026)",
-    "Michelle Gordon": "Executive Vice President and Acting Chief Development Officer",
-    "Howard Libit": "Executive Director, Baltimore Jewish Council (BJC/JCRC)",
-    "Marc Baker": "President and CEO",
-    "Jennifer Weinstock": "Executive Vice President, Philanthropy",
-    "Jeremy Burton": "CEO, Jewish Community Relations Council (JCRC) of Greater Boston",
-    "Ted Axelrod": "Interim Chief of Staff",
-    "Monica Gebell": "Director of Jewish Community Relations & Executive Director, Levine Center to End Hate"
-};
+const TITLE_CORRECTIONS = {};
 // Contact info: name -> { email, phone }
-const CONTACT_INFO = {
-    "Andrew Cushnir": { email: "", phone: "410-727-4828" },
-    "Gabrielle Burger": { email: "gburger@thejewishnetwork.org", phone: "410-735-5004" },
-    "Michael Balaban": { email: "ceo@jewishphilly.org", phone: "215-832-0500" },
-    "Jeffrey Lasday": { email: "", phone: "" },
-    "Kelly Romirowsky": { email: "", phone: "" },
-    "Alix Caplan": { email: "acaplan@jewishphilly.org", phone: "" },
-    "Sarah Bernstein Solomon": { email: "", phone: "" },
-    "Jason Holtzman": { email: "", phone: "" },
-    "Sarah Lefkowitz": { email: "slefkowitz@jewishphilly.org", phone: "215-832-0515" },
-    "Meredith Dragon": { email: "", phone: "973-929-3066" },
-    "Benjamin Mann": { email: "", phone: "" },
-    "Rebecca Pollack": { email: "", phone: "" },
-    "Amy Biloon": { email: "", phone: "" },
-    "Jason Shames": { email: "JasonS@jfnnj.org", phone: "201-820-3910" },
-    "Sheryl Sarin": { email: "SherylS@jfnnj.org", phone: "201-820-3913" },
-    "Rami Feinstein": { email: "", phone: "" },
-    "Ilana Berman": { email: "", phone: "" },
-    "Noam Bentov": { email: "", phone: "" },
-    "Ariel Libhaber": { email: "", phone: "" },
-    "Leah Goldman": { email: "lgoldman@jewishrochester.org", phone: "585-241-8635" },
-    "Michal Spivak": { email: "mspivak@jewishrochester.org", phone: "585-241-8611" },
-    "Efrat Petel": { email: "epetel@jewishrochester.org", phone: "585-241-8651" },
-    "Jeanine Monachino": { email: "jmonachino@jewishrochester.org", phone: "585-241-8630" },
-    "Debbie Goldberg": { email: "dgoldberg@jewishrochester.org", phone: "585-241-8627" },
-    "Randy Schuster": { email: "", phone: "" },
-    "Ted Axelrod": { email: "taxelrod@jewishrochester.org", phone: "585-241-8629" },
-    "Michelle Gordon": { email: "", phone: "410-727-4828" },
-    "Howard Libit": { email: "hlibit@baltjc.org", phone: "410-542-4850" },
-    "Marc Baker": { email: "", phone: "617-457-8500" },
-    "Jennifer Weinstock": { email: "", phone: "617-457-8500" },
-    "Jeremy Burton": { email: "jburton@jcrcboston.org", phone: "617-457-8600" },
-    "Monica Gebell": { email: "mgebell@jewishrochester.org", phone: "585-241-8651" },
-    "Michelle Ostroff": { email: "mostroff@associated.org", phone: "410-369-9231" }
-};
+const CONTACT_INFO = {};
 
 // Required people per federation (injected into existing data if missing)
-const REQUIRED_PEOPLE = {
-    baltimore: [
-        { name: "Michelle Gordon", role: "Executive Vice President and Acting Chief Development Officer", category: "Federation" },
-        { name: "Howard Libit", role: "Executive Director, Baltimore Jewish Council (BJC/JCRC)", category: "Federation" }
-    ],
-    cjp: [
-        { name: "Marc Baker", role: "President and CEO", category: "Federation" },
-        { name: "Jennifer Weinstock", role: "Executive Vice President, Philanthropy", category: "Federation" },
-        { name: "Jeremy Burton", role: "CEO, Jewish Community Relations Council (JCRC) of Greater Boston", category: "Federation" }
-    ],
-    rochester: [
-        { name: "Ted Axelrod", role: "Interim Chief of Staff", category: "Federation" },
-        { name: "Monica Gebell", role: "Director of Jewish Community Relations & Executive Director, Levine Center to End Hate", category: "Federation" }
-    ]
-};
+const REQUIRED_PEOPLE = {};
 
 // =============================================
 // DATA MIGRATION
@@ -1467,12 +1188,14 @@ function ensureNewFields(data) {
                     if (a.amount_25_26 != null) a.amounts.col_1 = a.amount_25_26;
                     if (a.amount_26_27 != null) a.amounts.col_2 = a.amount_26_27;
                 }
+                delete a.amount_24_25; delete a.amount_25_26; delete a.amount_26_27;
                 if (!a.docs) {
                     a.docs = {};
                     a.docs.col_0 = [];
                     a.docs.col_1 = a.docs_25_26 || [];
                     a.docs.col_2 = a.docs_26_27 || [];
                 }
+                delete a.docs_25_26; delete a.docs_26_27;
                 for (const col of (data.allocColumns || [])) {
                     if (!a.docs[col.id]) a.docs[col.id] = [];
                 }
@@ -1726,7 +1449,7 @@ document.addEventListener('alpine:init', () => {
         },
         exportToJSON() { const blob = new Blob([JSON.stringify(this.data, null, 2)], {type:'application/json'}); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'federation-dashboard-backup-'+new Date().toISOString().split('T')[0]+'.json'; a.click(); },
         importFromJSON(event) { const file = event.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = (e) => { try { const imported = JSON.parse(e.target.result); if (!imported.federations) throw new Error('Invalid format'); if (!confirm('This will replace all current data. Continue?')) return; this.data = imported; ensureNewFields(this.data); store.save(this.data); this.showImportModal = false; this.flashSave(); } catch(err) { alert('Invalid JSON file: '+err.message); } }; reader.readAsText(file); },
-        resetData() { if (!confirm('Reset ALL data to the original dataset? This cannot be undone.')) return; if (!confirm('Are you absolutely sure? All your edits will be lost.')) return; store.clear(); this.data = migrateRawData(RAW_DATA); ensureNewFields(this.data); store.save(this.data); this.flashSave(); },
+        resetData() { if (!confirm('Reset ALL data? This cannot be undone.')) return; if (!confirm('Are you absolutely sure? All your data will be lost.')) return; store.clear(); this.data = { _version: 2, _lastModified: new Date().toISOString(), federations: {}, userName: '', userRegion: '', userTitle: '', generalTaskCategories: [{ id: 'general', name: 'General', tasks: [] }], allocColumns: [{ id: 'col_0', label: '2025-26' }] }; store.save(this.data); this.flashSave(); },
 
         wizardAddFed() {
             const name = this.wizardNewFedName.trim();
