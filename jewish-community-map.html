@@ -1427,20 +1427,21 @@ document.addEventListener('alpine:init', () => {
                 if (rows.length === 0) { alert('No data found in file'); return; }
                 const needGeocode = [];
                 const direct = [];
+                const col = (row, ...keys) => { for (const k of keys) { if (row[k] != null && row[k].toString().trim()) return row[k].toString().trim(); } return ''; };
                 for (let i = 0; i < rows.length; i++) {
                     const row = rows[i];
-                    const name = (row.Name || row.name || row['Institution Name'] || row['institution name'] || '').toString().trim();
+                    const name = col(row, 'Name', 'name', 'Institution Name', 'institution name', 'שם המוסד', 'שם', 'מוסד');
                     if (!name) continue;
-                    const typeRaw = (row.Type || row.type || 'other').toString().trim().toLowerCase().replace(/\s+/g, '_');
-                    const denomRaw = (row.Denomination || row.denomination || 'other').toString().trim().toLowerCase().replace(/\s+/g, '_');
-                    const city = (row.City || row.city || '').toString().trim();
-                    const state = (row.State || row.state || '').toString().trim();
-                    const address = (row.Address || row.address || '').toString().trim();
-                    const federation = (row.Federation || row.federation || '').toString().trim();
-                    const shlichutVal = row['Has Shlichut'] || row.hasShlichut || row.Shlichut || row.shlichut || '';
-                    const hasShlichut = shlichutVal === true || shlichutVal === 1 || (shlichutVal.toString().toLowerCase() === 'yes') || (shlichutVal.toString().toLowerCase() === 'true');
-                    const lat = parseFloat(row.Lat || row.lat || row.Latitude || row.latitude || '');
-                    const lng = parseFloat(row.Lng || row.lng || row.Longitude || row.longitude || row.Long || row.long || '');
+                    const typeRaw = (col(row, 'Type', 'type', 'סוג ארגון', 'סוג') || 'other').toLowerCase().replace(/\s+/g, '_');
+                    const denomRaw = (col(row, 'Denomination', 'denomination', 'זרם') || 'other').toLowerCase().replace(/\s+/g, '_');
+                    const city = col(row, 'City', 'city', 'עיר');
+                    const state = col(row, 'State', 'state', 'מדינה');
+                    const address = col(row, 'Address', 'address', 'כתובת');
+                    const federation = col(row, 'Federation', 'federation', 'פדרציה', 'אזור');
+                    const shlichutVal = col(row, 'Has Shlichut', 'hasShlichut', 'Shlichut', 'shlichut', 'שליחות ארוכה- (כולל ש"ש)', 'שליחות');
+                    const hasShlichut = shlichutVal === 'true' || shlichutVal === 'yes' || shlichutVal === 'כן' || shlichutVal === '1';
+                    const lat = parseFloat(col(row, 'Lat', 'lat', 'Latitude', 'latitude') || '');
+                    const lng = parseFloat(col(row, 'Lng', 'lng', 'Longitude', 'longitude', 'Long', 'long') || '');
                     const entry = { name, type: typeRaw, denomination: denomRaw, city, state, address, federation, hasShlichut, lat, lng, idx: i };
                     if (!isNaN(lat) && !isNaN(lng)) direct.push(entry);
                     else needGeocode.push(entry);
