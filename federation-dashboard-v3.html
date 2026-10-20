@@ -247,17 +247,31 @@
                             </button>
                         </h3>
                         <div class="flex gap-2 mb-3">
-                            <input type="text" x-model="newTaskInputs[cat.id]" @keydown.enter="addGeneralTask(cat.id)" placeholder="Add task..." class="flex-1 px-3 py-2 border rounded-lg text-sm outline-none" :style="'border-color:' + taskCatColors[catIdx % taskCatColors.length].border" style="color: #111;">
+                            <input type="text" x-model="newTaskInputs[cat.id]" @keydown.enter="addGeneralTask(cat.id)" placeholder="Add task..." class="flex-1 px-3 py-2 border rounded-lg text-sm outline-none" :style="'border-color:' + taskCatColors[catIdx % taskCatColors.length].border" style="color: #111;" dir="auto">
                             <button @click="addGeneralTask(cat.id)" class="text-white px-3 py-2 rounded-lg text-sm font-medium transition" :style="'background-color:' + taskCatColors[catIdx % taskCatColors.length].main">+</button>
                         </div>
                         <div class="space-y-1 max-h-64 overflow-y-auto">
-                            <template x-for="task in cat.tasks" :key="task.id">
+                            <template x-for="(task, taskIdx) in cat.tasks" :key="task.id">
                                 <div class="flex items-center gap-2 rounded-lg px-3 py-2 group transition" :style="'background-color:' + taskCatColors[catIdx % taskCatColors.length].light">
                                     <input type="checkbox" :checked="task.done" @change="toggleGeneralTask(cat.id, task.id)" class="w-4 h-4 rounded cursor-pointer" :style="'accent-color:' + taskCatColors[catIdx % taskCatColors.length].main">
-                                    <span class="flex-1 text-sm" :class="task.done ? 'line-through text-gray-400' : 'text-gray-800'" x-text="task.text"></span>
-                                    <button @click="removeGeneralTask(cat.id, task.id)" class="opacity-0 group-hover:opacity-100 text-red-400 hover:text-red-600 transition no-print" title="Remove">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                                    </button>
+                                    <span x-show="editingTaskId !== task.id" @dblclick="editingTaskId = task.id" class="flex-1 text-sm cursor-text" :class="task.done ? 'line-through text-gray-400' : 'text-gray-800'" x-text="task.text" dir="auto"></span>
+                                    <template x-if="editingTaskId === task.id">
+                                        <input x-init="$nextTick(() => { $el.focus(); $el.select(); })" x-model="task.text" @blur="editingTaskId = null; autoSave()" @keydown.enter="$el.blur()" @keydown.escape="$el.blur()" class="flex-1 text-sm px-1 py-0.5 border rounded outline-none" dir="auto">
+                                    </template>
+                                    <div class="opacity-0 group-hover:opacity-100 flex items-center gap-0.5 transition no-print shrink-0">
+                                        <button x-show="taskIdx > 0" @click="moveTaskUp(cat.id, task.id)" class="text-gray-300 hover:text-gray-600 transition p-0.5" title="Move up">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/></svg>
+                                        </button>
+                                        <button x-show="taskIdx < cat.tasks.length - 1" @click="moveTaskDown(cat.id, task.id)" class="text-gray-300 hover:text-gray-600 transition p-0.5" title="Move down">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                                        </button>
+                                        <button @click="editingTaskId = task.id" class="text-gray-300 hover:text-gray-600 transition p-0.5" title="Edit">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+                                        </button>
+                                        <button @click="removeGeneralTask(cat.id, task.id)" class="text-red-400 hover:text-red-600 transition p-0.5" title="Remove">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                        </button>
+                                    </div>
                                 </div>
                             </template>
                             <template x-if="cat.tasks.length === 0">
@@ -330,6 +344,30 @@
                                         </button>
                                     </div>
                                 </template>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- JAFI TIERING -->
+                    <section>
+                        <h3 @click="toggleSection(fed.id,'jafiTiering')" class="flex items-center gap-2 text-lg font-semibold text-brand-600 cursor-pointer mb-2">
+                            <span>JAFI Tiering</span>
+                            <svg :class="sections[fed.id+'-jafiTiering'] ? 'rotate-180' : ''" class="w-4 h-4 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                        </h3>
+                        <div x-show="sections[fed.id+'-jafiTiering'] !== false" class="space-y-3">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-xs font-semibold text-gray-500 uppercase">Tier Level</label>
+                                    <input x-model="fed.jafiTiering.tierLevel" @input="autoSave()" class="mt-1 w-full bg-transparent border-b border-dashed border-gray-300 focus:border-brand-500 outline-none py-1" placeholder="e.g. Tier 1, Tier 2...">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-gray-500 uppercase">Annual Allocation</label>
+                                    <input x-model="fed.jafiTiering.annualAllocation" @input="autoSave()" class="mt-1 w-full bg-transparent border-b border-dashed border-gray-300 focus:border-brand-500 outline-none py-1" placeholder="e.g. $500,000">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-500 uppercase">Notes</label>
+                                <textarea x-model="fed.jafiTiering.notes" @input="autoSave()" rows="2" class="mt-1 w-full bg-transparent border-b border-dashed border-gray-300 focus:border-brand-500 outline-none py-1 resize-y" placeholder="Additional tiering notes..."></textarea>
                             </div>
                         </div>
                     </section>
@@ -1068,14 +1106,101 @@ function normCat(raw) { if (!raw) return 'Federation'; const l = raw.toLowerCase
 // PEOPLE CORRECTIONS (verified from federation websites Feb 2026)
 // =============================================
 // Name corrections: oldName -> newName
-const NAME_CORRECTIONS = {};
+const NAME_CORRECTIONS = {
+    "Andrew Kushnir": "Andrew Cushnir",
+    "Aharon Levitt": "Rabbi Aaron Levitt",
+    "Sara Salomon": "Sarah Bernstein Solomon",
+    "Sara Lefkowits": "Sarah Lefkowitz",
+    "Amy Bilun": "Amy Biloon",
+    "Lior Krangel": "Lior Krengel",
+    "Randy": "Randy Schuster"
+};
 // Title corrections: name -> correct title
-const TITLE_CORRECTIONS = {};
+const TITLE_CORRECTIONS = {
+    "Andrew Cushnir": "President and CEO",
+    "Ruth Miller": "Chief Planning Officer, Community Planning & Allocations",
+    "Michelle Ostroff": "Senior Vice President, Annual Campaign",
+    "Rabbi Aaron Levitt": "Executive Director, Jewish Educational Services (JES)",
+    "Gabrielle Burger": "Senior Director, Jewish Experiences (Jewish Connection Network)",
+    "Michael Balaban": "President & CEO",
+    "Kelly Romirowsky": "Chief Strategy & Impact Officer",
+    "Sarah Bernstein Solomon": "Chief Development Officer",
+    "Jason Holtzman": "Chief of Jewish Community Relations Council (JCRC)",
+    "Sarah Lefkowitz": "NextGen Director",
+    "Meredith Dragon": "Executive Vice President and CEO",
+    "Rebecca Pollack": "VP, Development",
+    "Michal Werner": "Executive Director, Jewish Community Foundation of Greater MetroWest NJ (since Jul 2025)",
+    "Tracy Levin": "Director, One Happy Camper NJ",
+    "Amy Biloon": "Chief Community Engagement Officer",
+    "Jason Shames": "CEO and Executive Vice President",
+    "Rami Feinstein": "Director, Center for Israel Engagement",
+    "Debbie Katz": "Principal Gifts Officer",
+    "Lior Krengel": "Director, CJP Israel Office",
+    "Leah Goldman": "Chief Planning & Program Officer",
+    "Michal Spivak": "Director of ShinShinim Programming",
+    "Efrat Petel": "Director, Israel & Global Jewry",
+    "Randy Schuster": "President (2025-2026)",
+    "Michelle Gordon": "Executive Vice President and Acting Chief Development Officer",
+    "Howard Libit": "Executive Director, Baltimore Jewish Council (BJC/JCRC)",
+    "Marc Baker": "President and CEO",
+    "Jennifer Weinstock": "Executive Vice President, Philanthropy",
+    "Jeremy Burton": "CEO, Jewish Community Relations Council (JCRC) of Greater Boston",
+    "Ted Axelrod": "Interim Chief of Staff",
+    "Monica Gebell": "Director of Jewish Community Relations & Executive Director, Levine Center to End Hate"
+};
 // Contact info: name -> { email, phone }
-const CONTACT_INFO = {};
+const CONTACT_INFO = {
+    "Andrew Cushnir": { email: "", phone: "410-727-4828" },
+    "Gabrielle Burger": { email: "gburger@thejewishnetwork.org", phone: "410-735-5004" },
+    "Michael Balaban": { email: "ceo@jewishphilly.org", phone: "215-832-0500" },
+    "Jeffrey Lasday": { email: "", phone: "" },
+    "Kelly Romirowsky": { email: "", phone: "" },
+    "Alix Caplan": { email: "acaplan@jewishphilly.org", phone: "" },
+    "Sarah Bernstein Solomon": { email: "", phone: "" },
+    "Jason Holtzman": { email: "", phone: "" },
+    "Sarah Lefkowitz": { email: "slefkowitz@jewishphilly.org", phone: "215-832-0515" },
+    "Meredith Dragon": { email: "", phone: "973-929-3066" },
+    "Benjamin Mann": { email: "", phone: "" },
+    "Rebecca Pollack": { email: "", phone: "" },
+    "Amy Biloon": { email: "", phone: "" },
+    "Jason Shames": { email: "JasonS@jfnnj.org", phone: "201-820-3910" },
+    "Sheryl Sarin": { email: "SherylS@jfnnj.org", phone: "201-820-3913" },
+    "Rami Feinstein": { email: "", phone: "" },
+    "Ilana Berman": { email: "", phone: "" },
+    "Noam Bentov": { email: "", phone: "" },
+    "Ariel Libhaber": { email: "", phone: "" },
+    "Leah Goldman": { email: "lgoldman@jewishrochester.org", phone: "585-241-8635" },
+    "Michal Spivak": { email: "mspivak@jewishrochester.org", phone: "585-241-8611" },
+    "Efrat Petel": { email: "epetel@jewishrochester.org", phone: "585-241-8651" },
+    "Jeanine Monachino": { email: "jmonachino@jewishrochester.org", phone: "585-241-8630" },
+    "Debbie Goldberg": { email: "dgoldberg@jewishrochester.org", phone: "585-241-8627" },
+    "Randy Schuster": { email: "", phone: "" },
+    "Ted Axelrod": { email: "taxelrod@jewishrochester.org", phone: "585-241-8629" },
+    "Michelle Gordon": { email: "", phone: "410-727-4828" },
+    "Howard Libit": { email: "hlibit@baltjc.org", phone: "410-542-4850" },
+    "Marc Baker": { email: "", phone: "617-457-8500" },
+    "Jennifer Weinstock": { email: "", phone: "617-457-8500" },
+    "Jeremy Burton": { email: "jburton@jcrcboston.org", phone: "617-457-8600" },
+    "Monica Gebell": { email: "mgebell@jewishrochester.org", phone: "585-241-8651" },
+    "Michelle Ostroff": { email: "mostroff@associated.org", phone: "410-369-9231" }
+};
 
 // Required people per federation (injected into existing data if missing)
-const REQUIRED_PEOPLE = {};
+const REQUIRED_PEOPLE = {
+    baltimore: [
+        { name: "Michelle Gordon", role: "Executive Vice President and Acting Chief Development Officer", category: "Federation" },
+        { name: "Howard Libit", role: "Executive Director, Baltimore Jewish Council (BJC/JCRC)", category: "Federation" }
+    ],
+    cjp: [
+        { name: "Marc Baker", role: "President and CEO", category: "Federation" },
+        { name: "Jennifer Weinstock", role: "Executive Vice President, Philanthropy", category: "Federation" },
+        { name: "Jeremy Burton", role: "CEO, Jewish Community Relations Council (JCRC) of Greater Boston", category: "Federation" }
+    ],
+    rochester: [
+        { name: "Ted Axelrod", role: "Interim Chief of Staff", category: "Federation" },
+        { name: "Monica Gebell", role: "Director of Jewish Community Relations & Executive Director, Levine Center to End Hate", category: "Federation" }
+    ]
+};
 
 // =============================================
 // DATA MIGRATION
@@ -1168,6 +1293,7 @@ function ensureNewFields(data) {
             }
         }
         // Ensure tasks array exists
+        if (!fed.jafiTiering) fed.jafiTiering = { tierLevel: '', annualAllocation: '', notes: '' };
         if (!fed.tasks) fed.tasks = [];
         // Ensure missions array exists
         if (!fed.missions) fed.missions = [];
@@ -1247,6 +1373,7 @@ document.addEventListener('alpine:init', () => {
         taskCatColors: [{main:'#0d9488',light:'#f0fdfa',border:'#99f6e4'},{main:'#4f46e5',light:'#eef2ff',border:'#c7d2fe'},{main:'#9333ea',light:'#faf5ff',border:'#e9d5ff'},{main:'#e11d48',light:'#fff1f2',border:'#fecdd3'},{main:'#d97706',light:'#fffbeb',border:'#fde68a'},{main:'#0891b2',light:'#ecfeff',border:'#a5f3fc'},{main:'#059669',light:'#ecfdf5',border:'#a7f3d0'},{main:'#c026d3',light:'#fdf4ff',border:'#f5d0fe'}],
         dragPerson: null, dragFedId: null,
         generalTasksOpen: true,
+        editingTaskId: null,
         _saveTimer: null,
 
         init() {
@@ -1413,12 +1540,14 @@ document.addEventListener('alpine:init', () => {
         addGeneralTask(catId) { const text = (this.newTaskInputs[catId] || '').trim(); if (!text) return; const cat = (this.data.generalTaskCategories || []).find(c => c.id === catId); if (!cat) return; cat.tasks.push({ id: genId('gt-'+catId), text: text, done: false, createdAt: new Date().toISOString() }); this.newTaskInputs[catId] = ''; this.autoSave(); },
         toggleGeneralTask(catId, taskId) { const cat = (this.data.generalTaskCategories || []).find(c => c.id === catId); if (!cat) return; const task = cat.tasks.find(t => t.id === taskId); if (task) { task.done = !task.done; this.autoSave(); } },
         removeGeneralTask(catId, taskId) { if (!confirm('Remove this task?')) return; const cat = (this.data.generalTaskCategories || []).find(c => c.id === catId); if (!cat) return; cat.tasks = cat.tasks.filter(t => t.id !== taskId); this.autoSave(); },
+        moveTaskUp(catId, taskId) { const cat = (this.data.generalTaskCategories || []).find(c => c.id === catId); if (!cat) return; const idx = cat.tasks.findIndex(t => t.id === taskId); if (idx <= 0) return; [cat.tasks[idx - 1], cat.tasks[idx]] = [cat.tasks[idx], cat.tasks[idx - 1]]; this.autoSave(); },
+        moveTaskDown(catId, taskId) { const cat = (this.data.generalTaskCategories || []).find(c => c.id === catId); if (!cat) return; const idx = cat.tasks.findIndex(t => t.id === taskId); if (idx < 0 || idx >= cat.tasks.length - 1) return; [cat.tasks[idx], cat.tasks[idx + 1]] = [cat.tasks[idx + 1], cat.tasks[idx]]; this.autoSave(); },
         get generalTasksCount() { if (!this.data || !this.data.generalTaskCategories) return 0; return this.data.generalTaskCategories.reduce((s,c) => s + c.tasks.filter(t=>!t.done).length, 0); },
         addTaskCategory() { const name = prompt('Enter category name:'); if (!name || !name.trim()) return; const id = 'cat-' + Date.now().toString(36); this.data.generalTaskCategories.push({ id, name: name.trim(), tasks: [] }); this.autoSave(); },
         renameTaskCategory(catId) { const cat = this.data.generalTaskCategories.find(c => c.id === catId); if (!cat) return; const name = prompt('Rename category:', cat.name); if (!name || !name.trim()) return; cat.name = name.trim(); this.autoSave(); },
         removeTaskCategory(catId) { const cat = this.data.generalTaskCategories.find(c => c.id === catId); if (!cat) return; const n = cat.tasks.length; if (!confirm('Remove "' + cat.name + '"' + (n > 0 ? ' and its ' + n + ' task(s)' : '') + '?')) return; this.data.generalTaskCategories = this.data.generalTaskCategories.filter(c => c.id !== catId); this.autoSave(); },
 
-        addFederation() { if (!this.newFed.name.trim()) return alert('Please enter a name'); const id = this.newFed.name.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/-+$/,''); if (this.data.federations[id]) return alert('A federation with a similar name already exists'); this.data.federations[id] = { id, name: this.newFed.name.trim(), region: this.newFed.region||'NE', community: { catchmentArea:null, population:null, annualBudget:null, controls:null, details:null, summerCamps:null, partnership:null }, people:[], allocations:[], shlichut:[], jafiPrograms:[], opportunities:[], visits:[], tasks:[], missions:[], notes:'', websiteInfo: { website:'', address:'', phone:'', email:'', mission:'', focusAreas:[], programs:[], charityRating:'', givingOptions:[] }, communityEvents:[] }; this.expanded[id] = true; this.newFed = { name:'', region:'NE' }; this.showAddFedModal = false; this.autoSave(); },
+        addFederation() { if (!this.newFed.name.trim()) return alert('Please enter a name'); const id = this.newFed.name.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/-+$/,''); if (this.data.federations[id]) return alert('A federation with a similar name already exists'); this.data.federations[id] = { id, name: this.newFed.name.trim(), region: this.newFed.region||'NE', community: { catchmentArea:null, population:null, annualBudget:null, controls:null, details:null, summerCamps:null, partnership:null }, people:[], allocations:[], shlichut:[], jafiPrograms:[], opportunities:[], visits:[], tasks:[], missions:[], jafiTiering: { tierLevel:'', annualAllocation:'', notes:'' }, notes:'', websiteInfo: { website:'', address:'', phone:'', email:'', mission:'', focusAreas:[], programs:[], charityRating:'', givingOptions:[] }, communityEvents:[] }; this.expanded[id] = true; this.newFed = { name:'', region:'NE' }; this.showAddFedModal = false; this.autoSave(); },
 
         exportToExcel() {
             const wb = XLSX.utils.book_new();
@@ -1437,6 +1566,7 @@ document.addEventListener('alpine:init', () => {
                 if (fed.communityEvents && fed.communityEvents.length > 0) { rows.push(['=== COMMUNITY EVENTS ===']); rows.push(['Name','Date','Time','Location','Cost','Category','Description']); fed.communityEvents.forEach(e => rows.push([e.name, e.date, e.time, e.location, e.cost, e.category, e.description])); rows.push([]); }
                 rows.push(['=== SHLICHUT ===']); fed.shlichut.forEach(s => rows.push([s])); rows.push([]);
                 rows.push(['=== JAFI PROGRAMS ===']); fed.jafiPrograms.forEach(p => rows.push([p])); rows.push([]);
+                if (fed.jafiTiering && (fed.jafiTiering.tierLevel || fed.jafiTiering.annualAllocation || fed.jafiTiering.notes)) { rows.push(['=== JAFI TIERING ===']); rows.push(['Tier Level', fed.jafiTiering.tierLevel || '']); rows.push(['Annual Allocation', fed.jafiTiering.annualAllocation || '']); if (fed.jafiTiering.notes) rows.push(['Notes', fed.jafiTiering.notes]); rows.push([]); }
                 rows.push(['=== OPPORTUNITIES ===']); fed.opportunities.forEach(o => rows.push([o])); rows.push([]);
                 if (fed.notes) { rows.push(['=== NOTES ===']); rows.push([fed.notes]); }
                 const ws = XLSX.utils.aoa_to_sheet(rows); ws['!cols'] = [{wch:35},{wch:25},{wch:20},{wch:15},{wch:15},{wch:15},{wch:30}];
@@ -1465,7 +1595,7 @@ document.addEventListener('alpine:init', () => {
             this.data.userTitle = this.wizardProfile.title.trim() || 'Regional Director';
             for (const fedName of this.wizardFederations) {
                 const id = fedName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/-+$/, '');
-                this.data.federations[id] = { id, name: fedName, region: this.data.userRegion || '', community: { catchmentArea: null, population: null, annualBudget: null, controls: null, details: null, summerCamps: null, partnership: null, budgetLines: [] }, people: [], allocations: [], shlichut: [], jafiPrograms: [], opportunities: [], visits: [], tasks: [], missions: [], notes: '', websiteInfo: { website: '', address: '', phone: '', email: '', mission: '', focusAreas: [], programs: [], charityRating: '', givingOptions: [] }, communityEvents: [], eventsLastUpdated: '' };
+                this.data.federations[id] = { id, name: fedName, region: this.data.userRegion || '', community: { catchmentArea: null, population: null, annualBudget: null, controls: null, details: null, summerCamps: null, partnership: null, budgetLines: [] }, people: [], allocations: [], shlichut: [], jafiPrograms: [], opportunities: [], visits: [], tasks: [], missions: [], jafiTiering: { tierLevel: '', annualAllocation: '', notes: '' }, notes: '', websiteInfo: { website: '', address: '', phone: '', email: '', mission: '', focusAreas: [], programs: [], charityRating: '', givingOptions: [] }, communityEvents: [], eventsLastUpdated: '' };
             }
             store.save(this.data);
             this.showWizard = false;
